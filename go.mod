@@ -1,4 +1,4 @@
-module github.com/hekonsek/aws-app
+module github.com/hekonsek/awsom
 
 require (
 	github.com/Pallinder/sillyname-go v0.0.0-20130730142914-97aeae9e6ba1

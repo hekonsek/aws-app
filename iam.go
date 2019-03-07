@@ -1,4 +1,4 @@
-package aws_app
+package awsom
 
 import (
 	"github.com/aws/aws-sdk-go/aws"

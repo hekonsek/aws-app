@@ -1,4 +1,4 @@
-package aws_app
+package awsom
 
 // Constants
 
@@ -23,7 +23,7 @@ type Application struct {
 	Name string
 }
 
-func (application *Application) Create() error {
+func (application *Application) CreateOrUpdate() error {
 	err := (&Role{
 		Name:                     codeBuildRoleName,
 		AssumeRolePolicyDocument: codeBuildAssumeRolePolicyDocument,
