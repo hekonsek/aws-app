@@ -92,3 +92,33 @@ func (r *Role) CreateOrUpdate() error {
 
 	return nil
 }
+
+func DeleteRole(roleName string) error {
+	sess, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	if err != nil {
+		return err
+	}
+	iamService := iam.New(sess)
+
+	policies, err := iamService.ListAttachedRolePolicies(&iam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
+	for _, policy := range policies.AttachedPolicies {
+		_, err = iamService.DetachRolePolicy(&iam.DetachRolePolicyInput{
+			RoleName:  aws.String(roleName),
+			PolicyArn: policy.PolicyArn,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = iamService.DeleteRole(&iam.DeleteRoleInput{
+		RoleName: aws.String(roleName),
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
