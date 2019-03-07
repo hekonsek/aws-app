@@ -1,6 +1,9 @@
 PACKAGES := github.com/hekonsek/awsom
 
-all: format build silent-test
+all: format rice build silent-test
+
+rice:
+	rice embed-go
 
 build:
 	GO111MODULE=on go build $(PACKAGES)

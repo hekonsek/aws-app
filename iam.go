@@ -1,9 +1,12 @@
 package awsom
 
 import (
+	"bytes"
+	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"text/template"
 )
 
 // Constants
@@ -20,6 +23,30 @@ type Role struct {
 	Name                     string
 	AssumeRolePolicyDocument string
 	Polices                  []string
+}
+
+func AssumeServiceRolePolicyDocument(serviceName string) (string, error) {
+	box, err := rice.FindBox("rice")
+	if err != nil {
+		return "", err
+	}
+	roleTemplate, err := box.String("assume_service_role_template.json")
+	if err != nil {
+		return "", err
+	}
+	templateParser, err := template.New("roleTemplate").Parse(roleTemplate)
+	if err != nil {
+		return "", err
+	}
+
+	var buffer bytes.Buffer
+	err = templateParser.Execute(&buffer, map[string]string{
+		"Service": serviceName,
+	})
+	if err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
 }
 
 func (r *Role) CreateOrUpdate() error {
