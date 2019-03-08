@@ -49,17 +49,17 @@ func AssumeServiceRolePolicyDocument(serviceName string) (string, error) {
 	return buffer.String(), nil
 }
 
-func (r *Role) CreateOrUpdate() error {
+func (r *Role) CreateOrUpdate() (string, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 	iamService := iam.New(sess)
 	roles, err := iamService.ListRoles(&iam.ListRolesInput{})
 	if err != nil {
-		return err
+		return "", err
 	}
 	var codeBuildRole *iam.Role
 	for _, role := range roles.Roles {
@@ -75,7 +75,7 @@ func (r *Role) CreateOrUpdate() error {
 			AssumeRolePolicyDocument: aws.String(r.AssumeRolePolicyDocument),
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 		codeBuildRole = createRoleResponse.Role
 
@@ -85,12 +85,12 @@ func (r *Role) CreateOrUpdate() error {
 				PolicyArn: aws.String(policy),
 			})
 			if err != nil {
-				return err
+				return "", err
 			}
 		}
 	}
 
-	return nil
+	return *codeBuildRole.Arn, nil
 }
 
 func DeleteRole(roleName string) error {
@@ -121,4 +121,26 @@ func DeleteRole(roleName string) error {
 	}
 
 	return nil
+}
+
+func RoleArn(roleName string) (string, error) {
+	sess, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	if err != nil {
+		return "", err
+	}
+	iamService := iam.New(sess)
+
+	role, err := iamService.GetRole(&iam.GetRoleInput{
+		RoleName: aws.String(roleName),
+	})
+	if role.Role == nil {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+
+	return *role.Role.Arn, nil
 }

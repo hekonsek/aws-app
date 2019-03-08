@@ -1,24 +1,26 @@
 package awsom
 
-// Constants
-
-const codeBuildRoleName = "aws-app-codebuild"
-
 // Application type
 
 type Application struct {
-	Name string
+	Name   string
+	GitUrl string
 }
 
 func (application *Application) CreateOrUpdate() error {
-	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
+	err := ApplyCodeBuildDefaults(CodeBuild{
+		Name:   application.Name,
+		GitUrl: application.GitUrl,
+	}).CreateOrUpdate()
 	if err != nil {
 		return err
 	}
-	err = (&Role{
-		Name:                     codeBuildRoleName,
-		AssumeRolePolicyDocument: assumeRolePolicyDocument,
-		Polices:                  []string{PolicyCloudWatchLogsFullAccess, PolicyAmazonS3FullAccess, PolicyAmazonEC2ContainerRegistryFullAccess},
+
+	err = ApplyCodeBuildDefaults(CodeBuild{
+		Name:       application.Name + "-dockerize",
+		GitUrl:     application.GitUrl,
+		BuildSpec:  "buildspec-docker.yml",
+		BuildImage: "aws/codebuild/docker:18.09.0",
 	}).CreateOrUpdate()
 	if err != nil {
 		return err

@@ -9,7 +9,8 @@ func TestCreateApplication(t *testing.T) {
 	t.Parallel()
 
 	err := (&Application{
-		Name: RandomName(),
+		Name:   RandomName(),
+		GitUrl: "https://github.com/hekonsek/awsom-spring-rest",
 	}).CreateOrUpdate()
 
 	assert.NoError(t, err)

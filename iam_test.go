@@ -14,7 +14,7 @@ func TestCodeBuildRoleExists(t *testing.T) {
 	roleName := RandomName()
 
 	// When
-	err = (&Role{
+	_, err = (&Role{
 		Name:                     roleName,
 		AssumeRolePolicyDocument: assumeRolePolicyDocument,
 		Polices:                  []string{PolicyCloudWatchLogsFullAccess, PolicyAmazonS3FullAccess, PolicyAmazonEC2ContainerRegistryFullAccess},
