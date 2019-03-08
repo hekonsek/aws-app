@@ -17,6 +17,22 @@ type CodePipeline struct {
 }
 
 func (codePipeline *CodePipeline) CreateOrUpdate() error {
+	sess, err := CreateSession()
+	if err != nil {
+		return err
+	}
+	codePipelineService := codepipeline.New(sess)
+
+	existingPipelines, err := codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{})
+	if err != nil {
+		return err
+	}
+	for _, pipeline := range existingPipelines.Pipelines {
+		if *pipeline.Name == codePipeline.Name {
+			return nil
+		}
+	}
+
 	roleArn, err := RoleArn(codePipelineRoleName)
 	if err != nil {
 		return err
@@ -42,12 +58,6 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 	if err != nil {
 		return err
 	}
-
-	sess, err := CreateSession()
-	if err != nil {
-		return err
-	}
-	codePipelineService := codepipeline.New(sess)
 
 	gitProjectWithGitSuffix := strings.Replace(codePipeline.GitUrl, "https://github.com/", "", 1)
 	gitProjectInlined := strings.Replace(gitProjectWithGitSuffix, ".git", "", -1)
@@ -83,10 +93,10 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 						},
 					},
 				},
-				&codepipeline.StageDeclaration{
+				{
 					Name: aws.String("build"),
 					Actions: []*codepipeline.ActionDeclaration{
-						&codepipeline.ActionDeclaration{
+						{
 							Name: aws.String("build"),
 							ActionTypeId: &codepipeline.ActionTypeId{
 								Owner:    aws.String(codepipeline.ActionOwnerAws),
@@ -110,10 +120,10 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 						},
 					},
 				},
-				&codepipeline.StageDeclaration{
+				{
 					Name: aws.String("dockerize"),
 					Actions: []*codepipeline.ActionDeclaration{
-						&codepipeline.ActionDeclaration{
+						{
 							Name: aws.String("dockerize"),
 							ActionTypeId: &codepipeline.ActionTypeId{
 								Owner:    aws.String(codepipeline.ActionOwnerAws),
@@ -125,7 +135,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 								"ProjectName": aws.String(codePipeline.Name + "-dockerize"),
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
-								&codepipeline.InputArtifact{
+								{
 									Name: aws.String("build"),
 								},
 							},

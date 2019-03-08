@@ -27,6 +27,19 @@ func ApplyCodeBuildDefaults(codeBuild CodeBuild) *CodeBuild {
 }
 
 func (codeBuild *CodeBuild) CreateOrUpdate() error {
+	sess, err := CreateSession()
+	if err != nil {
+		return err
+	}
+	codeBuildService := codebuild.New(sess)
+
+	existingProjects, err := codeBuildService.ListProjects(&codebuild.ListProjectsInput{})
+	for _, project := range existingProjects.Projects {
+		if *project == codeBuild.Name {
+			return nil
+		}
+	}
+
 	roleArn, err := RoleArn(codeBuildRoleName)
 	if err != nil {
 		return err
@@ -46,11 +59,6 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 		}
 	}
 
-	sess, err := CreateSession()
-	if err != nil {
-		return err
-	}
-	codeBuildService := codebuild.New(sess)
 	_, err = codeBuildService.CreateProject(&codebuild.CreateProjectInput{
 		Name:        aws.String(codeBuild.Name),
 		ServiceRole: aws.String(roleArn),
