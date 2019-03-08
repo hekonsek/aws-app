@@ -7,7 +7,7 @@ import (
 
 // Constants
 
-const codeBuildRoleName = "aws-app-codebuild"
+const codeBuildRoleName = "awsom-codebuild"
 
 type CodeBuild struct {
 	Name       string

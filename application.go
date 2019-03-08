@@ -26,6 +26,14 @@ func (application *Application) CreateOrUpdate() error {
 		return err
 	}
 
+	err = (&CodePipeline{
+		Name:   application.Name,
+		GitUrl: application.GitUrl,
+	}).CreateOrUpdate()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -35,6 +43,10 @@ func DeleteApplication(name string) error {
 		return err
 	}
 	err = DeleteCodeBuild(name + "-dockerize")
+	if err != nil {
+		return err
+	}
+	err = DeleteCodePipeline(name)
 	if err != nil {
 		return err
 	}

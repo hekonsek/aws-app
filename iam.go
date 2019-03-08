@@ -16,6 +16,8 @@ const PolicyAmazonS3FullAccess = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 
 const PolicyAmazonEC2ContainerRegistryFullAccess = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 
+const PolicyAWSCodeBuildDeveloperAccess = "arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess"
+
 // Roles
 
 type Role struct {
