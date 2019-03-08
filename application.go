@@ -28,3 +28,16 @@ func (application *Application) CreateOrUpdate() error {
 
 	return nil
 }
+
+func DeleteApplication(name string) error {
+	err := DeleteCodeBuild(name)
+	if err != nil {
+		return err
+	}
+	err = DeleteCodeBuild(name + "-dockerize")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

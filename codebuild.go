@@ -2,7 +2,6 @@ package awsom
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/codebuild"
 )
 
@@ -28,13 +27,6 @@ func ApplyCodeBuildDefaults(codeBuild CodeBuild) *CodeBuild {
 }
 
 func (codeBuild *CodeBuild) CreateOrUpdate() error {
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
-	if err != nil {
-		return err
-	}
-
 	roleArn, err := RoleArn(codeBuildRoleName)
 	if err != nil {
 		return err
@@ -54,6 +46,10 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 		}
 	}
 
+	sess, err := CreateSession()
+	if err != nil {
+		return err
+	}
 	codeBuildService := codebuild.New(sess)
 	_, err = codeBuildService.CreateProject(&codebuild.CreateProjectInput{
 		Name:        aws.String(codeBuild.Name),
@@ -72,6 +68,23 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 			Type:     aws.String(codebuild.ArtifactsTypeS3),
 			Location: aws.String("capsilon-hekonsek"),
 		},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteCodeBuild(projectName string) error {
+	sess, err := CreateSession()
+	if err != nil {
+		return err
+	}
+	codeBuildService := codebuild.New(sess)
+
+	_, err = codeBuildService.DeleteProject(&codebuild.DeleteProjectInput{
+		Name: aws.String(projectName),
 	})
 	if err != nil {
 		return err

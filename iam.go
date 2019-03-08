@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"text/template"
 )
@@ -50,9 +49,7 @@ func AssumeServiceRolePolicyDocument(serviceName string) (string, error) {
 }
 
 func (r *Role) CreateOrUpdate() (string, error) {
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	sess, err := CreateSession()
 	if err != nil {
 		return "", err
 	}
@@ -94,9 +91,7 @@ func (r *Role) CreateOrUpdate() (string, error) {
 }
 
 func DeleteRole(roleName string) error {
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	sess, err := CreateSession()
 	if err != nil {
 		return err
 	}
@@ -124,9 +119,7 @@ func DeleteRole(roleName string) error {
 }
 
 func RoleArn(roleName string) (string, error) {
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	sess, err := CreateSession()
 	if err != nil {
 		return "", err
 	}

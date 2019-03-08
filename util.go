@@ -6,5 +6,6 @@ import (
 )
 
 func RandomName() string {
-	return strings.Replace(sillyname.GenerateStupidName(), " ", "", -1)
+	lowerCased := strings.ToLower(sillyname.GenerateStupidName())
+	return strings.Replace(lowerCased, " ", "", -1)
 }
