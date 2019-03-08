@@ -36,6 +36,13 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 		}
 	}
 
+	err = (&S3Bucket{
+		Name: codePipeline.Name,
+	}).CreateOrUpdate()
+	if err != nil {
+		return err
+	}
+
 	sess, err := CreateSession()
 	if err != nil {
 		return err
@@ -128,7 +135,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 			},
 			ArtifactStore: &codepipeline.ArtifactStore{
 				Type:     aws.String(codepipeline.ArtifactStoreTypeS3),
-				Location: aws.String("capsilon-hekonsek"),
+				Location: aws.String(codePipeline.Name),
 			},
 		},
 	})
