@@ -108,12 +108,12 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 								"ProjectName": aws.String(codePipeline.Name),
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
-								&codepipeline.InputArtifact{
+								{
 									Name: aws.String("source"),
 								},
 							},
 							OutputArtifacts: []*codepipeline.OutputArtifact{
-								&codepipeline.OutputArtifact{
+								{
 									Name: aws.String("build"),
 								},
 							},

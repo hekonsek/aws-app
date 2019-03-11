@@ -1,5 +1,9 @@
 package awsom
 
+import "errors"
+
+const ErrorApplicationNameTooShort = "ERR_TO_SHORT"
+
 // Application type
 
 type Application struct {
@@ -8,6 +12,10 @@ type Application struct {
 }
 
 func (application *Application) CreateOrUpdate() error {
+	if len(application.Name) < 3 {
+		return errors.New(ErrorApplicationNameTooShort)
+	}
+
 	err := ApplyCodeBuildDefaults(CodeBuild{
 		Name:   application.Name,
 		GitUrl: application.GitUrl,

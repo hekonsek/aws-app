@@ -34,7 +34,13 @@ var appCreateCommand = &cobra.Command{
 			GitUrl: appCreateGitUrl,
 		}).CreateOrUpdate()
 		if err != nil {
-			panic(err)
+			if err.Error() == awsom.ErrorApplicationNameTooShort {
+				fmt.Printf("Application name %s is less than 3 characters long.\n", color.GreenString(appCreateName))
+				return
+			} else {
+				fmt.Printf("Something went wrong: %s\n", err.Error())
+				return
+			}
 		}
 		fmt.Println("Application " + color.GreenString(appCreateName) + " created.")
 		println()
