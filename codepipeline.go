@@ -156,6 +156,27 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 	return nil
 }
 
+type CodePipelineRecord struct {
+	Name string
+}
+
+func ListCodePipelines() ([]CodePipelineRecord, error) {
+	sess, err := CreateSession()
+	if err != nil {
+		return nil, err
+	}
+	codePipelineService := codepipeline.New(sess)
+
+	pipelines, err := codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{})
+	pipelinesRecords := []CodePipelineRecord{}
+	for _, pipeline := range pipelines.Pipelines {
+		pipelinesRecords = append(pipelinesRecords, CodePipelineRecord{
+			Name: *pipeline.Name,
+		})
+	}
+	return pipelinesRecords, nil
+}
+
 func DeleteCodePipeline(name string) error {
 	sess, err := CreateSession()
 	if err != nil {

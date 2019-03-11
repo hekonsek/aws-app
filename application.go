@@ -45,6 +45,24 @@ func (application *Application) CreateOrUpdate() error {
 	return nil
 }
 
+type ApplicationRecord struct {
+	Name string
+}
+
+func ListApplications() ([]ApplicationRecord, error) {
+	pipelines, err := ListCodePipelines()
+	if err != nil {
+		return nil, err
+	}
+	applications := []ApplicationRecord{}
+	for _, pipeline := range pipelines {
+		applications = append(applications, ApplicationRecord{
+			Name: pipeline.Name,
+		})
+	}
+	return applications, nil
+}
+
 func DeleteApplication(name string) error {
 	err := DeleteCodeBuild(name)
 	if err != nil {
