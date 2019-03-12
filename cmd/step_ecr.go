@@ -47,6 +47,6 @@ var stepEcrCommand = &cobra.Command{
 			}
 		}
 
-		println(repositoryName)
+		fmt.Println(repositoryName)
 	},
 }

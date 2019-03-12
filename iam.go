@@ -5,6 +5,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"os"
 	"strings"
 	"text/template"
 )
@@ -22,6 +23,8 @@ const PolicyAWSCodeBuildDeveloperAccess = "arn:aws:iam::aws:policy/AWSCodeBuildD
 const PolicySecretsManagerReadWrite = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 
 const PolicyAWSCodePipelineReadOnlyAccess = "arn:aws:iam::aws:policy/AWSCodePipelineReadOnlyAccess"
+
+const PolicyIAMReadOnlyAccess = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
 
 // Role CRUD
 
@@ -110,16 +113,20 @@ func iamService() (*iam.IAM, error) {
 }
 
 func AccountId() (string, error) {
-	iamService, err := iamService()
-	if err != nil {
-		return "", err
+	if os.Getenv("CODEBUILD_BUILD_ARN") == "" {
+		iamService, err := iamService()
+		if err != nil {
+			return "", err
+		}
+		user, err := iamService.GetUser(&iam.GetUserInput{})
+		if err != nil {
+			return "", err
+		}
+		arnWithoutPrefix := strings.Replace(*user.User.Arn, "arn:aws:iam::", "", 1)
+		return strings.Split(arnWithoutPrefix, ":")[0], nil
+	} else {
+		return strings.Split(os.Getenv("CODEBUILD_BUILD_ARN"), ":")[4], nil
 	}
-	user, err := iamService.GetUser(&iam.GetUserInput{})
-	if err != nil {
-		return "", err
-	}
-	arnWithoutPrefix := strings.Replace(*user.User.Arn, "arn:aws:iam::", "", 1)
-	return strings.Split(arnWithoutPrefix, ":")[0], nil
 }
 
 func RoleArn(roleName string) (string, error) {
