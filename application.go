@@ -56,7 +56,7 @@ func (application *Application) CreateOrUpdate() error {
 	}
 
 	err = ApplyCodeBuildDefaults(CodeBuild{
-		Name:       application.Name + "-version",
+		Name:       VersionStageName(application.Name),
 		GitUrl:     application.GitUrl,
 		BuildSpec:  "buildspec-version.yml",
 		BuildImage: "hekonsek/awsom",
@@ -66,7 +66,7 @@ func (application *Application) CreateOrUpdate() error {
 	}
 
 	err = ApplyCodeBuildDefaults(CodeBuild{
-		Name:       application.Name + "-dockerize",
+		Name:       DockerizeStageName(application.Name),
 		GitUrl:     application.GitUrl,
 		BuildSpec:  "buildspec-docker.yml",
 		BuildImage: "aws/codebuild/docker:18.09.0",
@@ -109,7 +109,11 @@ func DeleteApplication(name string) error {
 	if err != nil {
 		return err
 	}
-	err = DeleteCodeBuild(name + "-dockerize")
+	err = DeleteCodeBuild(VersionStageName(name))
+	if err != nil {
+		return err
+	}
+	err = DeleteCodeBuild(DockerizeStageName(name))
 	if err != nil {
 		return err
 	}
