@@ -94,6 +94,33 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 					},
 				},
 				{
+					Name: aws.String("version"),
+					Actions: []*codepipeline.ActionDeclaration{
+						{
+							Name: aws.String("version"),
+							ActionTypeId: &codepipeline.ActionTypeId{
+								Owner:    aws.String(codepipeline.ActionOwnerAws),
+								Provider: aws.String("CodeBuild"),
+								Category: aws.String(codepipeline.ActionCategoryBuild),
+								Version:  aws.String("1"),
+							},
+							Configuration: map[string]*string{
+								"ProjectName": aws.String(codePipeline.Name + "-version"),
+							},
+							InputArtifacts: []*codepipeline.InputArtifact{
+								{
+									Name: aws.String("source"),
+								},
+							},
+							OutputArtifacts: []*codepipeline.OutputArtifact{
+								{
+									Name: aws.String("versioned-source"),
+								},
+							},
+						},
+					},
+				},
+				{
 					Name: aws.String("build"),
 					Actions: []*codepipeline.ActionDeclaration{
 						{
@@ -109,7 +136,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
 								{
-									Name: aws.String("source"),
+									Name: aws.String("versioned-source"),
 								},
 							},
 							OutputArtifacts: []*codepipeline.OutputArtifact{

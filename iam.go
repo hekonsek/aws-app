@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-// Constants
+// Policies
 
 const PolicyCloudWatchLogsFullAccess = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 
@@ -18,7 +18,11 @@ const PolicyAmazonEC2ContainerRegistryFullAccess = "arn:aws:iam::aws:policy/Amaz
 
 const PolicyAWSCodeBuildDeveloperAccess = "arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess"
 
-// Roles
+const PolicySecretsManagerReadWrite = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+
+const PolicyAWSCodePipelineReadOnlyAccess = "arn:aws:iam::aws:policy/AWSCodePipelineReadOnlyAccess"
+
+// Role CRUD
 
 type Role struct {
 	Name                     string
@@ -26,36 +30,11 @@ type Role struct {
 	Polices                  []string
 }
 
-func AssumeServiceRolePolicyDocument(serviceName string) (string, error) {
-	box, err := rice.FindBox("rice")
-	if err != nil {
-		return "", err
-	}
-	roleTemplate, err := box.String("assume_service_role_template.json")
-	if err != nil {
-		return "", err
-	}
-	templateParser, err := template.New("roleTemplate").Parse(roleTemplate)
-	if err != nil {
-		return "", err
-	}
-
-	var buffer bytes.Buffer
-	err = templateParser.Execute(&buffer, map[string]string{
-		"Service": serviceName,
-	})
-	if err != nil {
-		return "", err
-	}
-	return buffer.String(), nil
-}
-
 func (r *Role) CreateOrUpdate() (string, error) {
-	sess, err := CreateSession()
+	iamService, err := iamService()
 	if err != nil {
 		return "", err
 	}
-	iamService := iam.New(sess)
 	roles, err := iamService.ListRoles(&iam.ListRolesInput{})
 	if err != nil {
 		return "", err
@@ -81,7 +60,7 @@ func (r *Role) CreateOrUpdate() (string, error) {
 		for _, policy := range r.Polices {
 			_, err = iamService.AttachRolePolicy(&iam.AttachRolePolicyInput{
 				RoleName:  codeBuildRole.RoleName,
-				PolicyArn: aws.String(policy),
+				PolicyArn: aws.String(string(policy)),
 			})
 			if err != nil {
 				return "", err
@@ -93,11 +72,10 @@ func (r *Role) CreateOrUpdate() (string, error) {
 }
 
 func DeleteRole(roleName string) error {
-	sess, err := CreateSession()
+	iamService, err := iamService()
 	if err != nil {
 		return err
 	}
-	iamService := iam.New(sess)
 
 	policies, err := iamService.ListAttachedRolePolicies(&iam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
 	for _, policy := range policies.AttachedPolicies {
@@ -120,12 +98,21 @@ func DeleteRole(roleName string) error {
 	return nil
 }
 
-func RoleArn(roleName string) (string, error) {
+// Role helpers
+
+func iamService() (*iam.IAM, error) {
 	sess, err := CreateSession()
+	if err != nil {
+		return nil, err
+	}
+	return iam.New(sess), nil
+}
+
+func RoleArn(roleName string) (string, error) {
+	iamService, err := iamService()
 	if err != nil {
 		return "", err
 	}
-	iamService := iam.New(sess)
 
 	role, err := iamService.GetRole(&iam.GetRoleInput{
 		RoleName: aws.String(roleName),
@@ -138,4 +125,28 @@ func RoleArn(roleName string) (string, error) {
 	}
 
 	return *role.Role.Arn, nil
+}
+
+func AssumeServiceRolePolicyDocument(serviceName string) (string, error) {
+	box, err := rice.FindBox("rice")
+	if err != nil {
+		return "", err
+	}
+	roleTemplate, err := box.String("assume_service_role_template.json")
+	if err != nil {
+		return "", err
+	}
+	templateParser, err := template.New("roleTemplate").Parse(roleTemplate)
+	if err != nil {
+		return "", err
+	}
+
+	var buffer bytes.Buffer
+	err = templateParser.Execute(&buffer, map[string]string{
+		"Service": serviceName,
+	})
+	if err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
 }

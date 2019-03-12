@@ -52,7 +52,8 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 		roleArn, err = (&Role{
 			Name:                     codeBuildRoleName,
 			AssumeRolePolicyDocument: assumeRolePolicyDocument,
-			Polices:                  []string{PolicyCloudWatchLogsFullAccess, PolicyAmazonS3FullAccess, PolicyAmazonEC2ContainerRegistryFullAccess},
+			Polices: []string{PolicyCloudWatchLogsFullAccess, PolicyAmazonS3FullAccess, PolicyAmazonEC2ContainerRegistryFullAccess,
+				PolicySecretsManagerReadWrite, PolicyAWSCodePipelineReadOnlyAccess},
 		}).CreateOrUpdate()
 		if err != nil {
 			return err

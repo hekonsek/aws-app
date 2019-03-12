@@ -1,6 +1,8 @@
 package awsom
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -14,14 +16,42 @@ func TestCodeBuildRoleExists(t *testing.T) {
 	roleName := RandomName()
 
 	// When
+	arn, err := (&Role{
+		Name:                     roleName,
+		AssumeRolePolicyDocument: assumeRolePolicyDocument,
+	}).CreateOrUpdate()
+	assert.NoError(t, err)
+
+	// Then
+	assert.NotEmpty(t, arn)
+
+	// Clean up
+	err = DeleteRole(roleName)
+	assert.NoError(t, err)
+}
+
+func TestRoleHasPolicy(t *testing.T) {
+	t.Parallel()
+
+	// Given
+	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
+	assert.NoError(t, err)
+	roleName := RandomName()
+
+	// When
 	_, err = (&Role{
 		Name:                     roleName,
 		AssumeRolePolicyDocument: assumeRolePolicyDocument,
-		Polices:                  []string{PolicyCloudWatchLogsFullAccess, PolicyAmazonS3FullAccess, PolicyAmazonEC2ContainerRegistryFullAccess},
+		Polices:                  []string{PolicyCloudWatchLogsFullAccess},
 	}).CreateOrUpdate()
+	assert.NoError(t, err)
 
 	// Then
+	iamService, err := iamService()
 	assert.NoError(t, err)
+	policies, err := iamService.ListAttachedRolePolicies(&iam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
+	assert.NoError(t, err)
+	assert.True(t, len(policies.AttachedPolicies) == 1)
 
 	// Clean up
 	err = DeleteRole(roleName)

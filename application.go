@@ -1,6 +1,11 @@
 package awsom
 
-import "errors"
+import (
+	"errors"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"os"
+)
 
 const ErrorApplicationNameTooShort = "ERR_TO_SHORT"
 
@@ -16,9 +21,45 @@ func (application *Application) CreateOrUpdate() error {
 		return errors.New(ErrorApplicationNameTooShort)
 	}
 
-	err := ApplyCodeBuildDefaults(CodeBuild{
+	sess, err := CreateSession()
+	if err != nil {
+		panic(err)
+	}
+	secretsManagerService := secretsmanager.New(sess)
+	secrets, err := secretsManagerService.ListSecrets(&secretsmanager.ListSecretsInput{})
+	if err != nil {
+		panic(err)
+	}
+	secretExists := false
+	for _, secret := range secrets.SecretList {
+		if *secret.Name == application.Name {
+			secretExists = true
+			break
+		}
+	}
+	if !secretExists {
+		_, err := secretsManagerService.CreateSecret(&secretsmanager.CreateSecretInput{
+			Name:         aws.String(application.Name),
+			SecretString: aws.String(os.Getenv("GITHUB_TOKEN")),
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	err = ApplyCodeBuildDefaults(CodeBuild{
 		Name:   application.Name,
 		GitUrl: application.GitUrl,
+	}).CreateOrUpdate()
+	if err != nil {
+		return err
+	}
+
+	err = ApplyCodeBuildDefaults(CodeBuild{
+		Name:       application.Name + "-version",
+		GitUrl:     application.GitUrl,
+		BuildSpec:  "buildspec-version.yml",
+		BuildImage: "hekonsek/awsom",
 	}).CreateOrUpdate()
 	if err != nil {
 		return err

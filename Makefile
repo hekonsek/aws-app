@@ -16,3 +16,12 @@ silent-test:
 
 format:
 	GO111MODULE=on go fmt $(PACKAGES)
+
+docker-build: build
+	docker build -t hekonsek/awsom .
+
+docker-push: docker-build
+	docker push hekonsek/awsom
+
+lint: format
+	~/go/bin/golint $(PACKAGES)
