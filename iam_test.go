@@ -60,6 +60,8 @@ func TestRoleHasPolicy(t *testing.T) {
 }
 
 func TestReadAccountId(t *testing.T) {
+	t.Parallel()
+
 	id, err := AccountId()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, id)
