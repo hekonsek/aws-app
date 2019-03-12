@@ -5,6 +5,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"strings"
 	"text/template"
 )
 
@@ -106,6 +107,19 @@ func iamService() (*iam.IAM, error) {
 		return nil, err
 	}
 	return iam.New(sess), nil
+}
+
+func AccountId() (string, error) {
+	iamService, err := iamService()
+	if err != nil {
+		return "", err
+	}
+	user, err := iamService.GetUser(&iam.GetUserInput{})
+	if err != nil {
+		return "", err
+	}
+	arnWithoutPrefix := strings.Replace(*user.User.Arn, "arn:aws:iam::", "", 1)
+	return strings.Split(arnWithoutPrefix, ":")[0], nil
 }
 
 func RoleArn(roleName string) (string, error) {

@@ -3,6 +3,7 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"strconv"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -55,5 +56,13 @@ func TestRoleHasPolicy(t *testing.T) {
 
 	// Clean up
 	err = DeleteRole(roleName)
+	assert.NoError(t, err)
+}
+
+func TestReadAccountId(t *testing.T) {
+	id, err := AccountId()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, id)
+	_, err = strconv.ParseInt(id, 0, 64)
 	assert.NoError(t, err)
 }
