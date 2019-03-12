@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"os"
+	"strings"
 )
 
 const ErrorApplicationNameTooShort = "ERR_TO_SHORT"
@@ -123,4 +124,9 @@ func DeleteApplication(name string) error {
 	}
 
 	return nil
+}
+
+func ApplicationNameFromCurrentBuild() string {
+	buildName := strings.Split(os.Getenv("CODEBUILD_BUILD_ID"), ":")[0]
+	return strings.Split(buildName, "-")[0]
 }
