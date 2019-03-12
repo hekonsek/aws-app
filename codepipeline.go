@@ -105,7 +105,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 								Version:  aws.String("1"),
 							},
 							Configuration: map[string]*string{
-								"ProjectName": aws.String(VersionStageName(codePipeline.Name )),
+								"ProjectName": aws.String(VersionStageName(codePipeline.Name)),
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
 								{
@@ -222,9 +222,9 @@ func DeleteCodePipeline(name string) error {
 }
 
 func VersionStageName(name string) string {
-	return name+"-version"
+	return name + "-version"
 }
 
 func DockerizeStageName(name string) string {
-	return name+"-dockerize"
+	return name + "-dockerize"
 }
