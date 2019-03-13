@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+// Service
+
+func CodePipelineService() (*codepipeline.CodePipeline, error) {
+	sess, err := CreateSession()
+	if err != nil {
+		return nil, err
+	}
+	return codepipeline.New(sess), err
+}
+
 // Constants
 
 const codePipelineRoleName = "awsom-codepipeline"
@@ -17,11 +27,10 @@ type CodePipeline struct {
 }
 
 func (codePipeline *CodePipeline) CreateOrUpdate() error {
-	sess, err := CreateSession()
+	codePipelineService, err := CodePipelineService()
 	if err != nil {
 		return err
 	}
-	codePipelineService := codepipeline.New(sess)
 
 	existingPipelines, err := codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{})
 	if err != nil {
@@ -188,11 +197,10 @@ type CodePipelineRecord struct {
 }
 
 func ListCodePipelines() ([]CodePipelineRecord, error) {
-	sess, err := CreateSession()
+	codePipelineService, err := CodePipelineService()
 	if err != nil {
 		return nil, err
 	}
-	codePipelineService := codepipeline.New(sess)
 
 	pipelines, err := codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{})
 	pipelinesRecords := []CodePipelineRecord{}
@@ -205,11 +213,10 @@ func ListCodePipelines() ([]CodePipelineRecord, error) {
 }
 
 func DeleteCodePipeline(name string) error {
-	sess, err := CreateSession()
+	codePipelineService, err := CodePipelineService()
 	if err != nil {
 		return err
 	}
-	codePipelineService := codepipeline.New(sess)
 
 	_, err = codePipelineService.DeletePipeline(&codepipeline.DeletePipelineInput{
 		Name: aws.String(name),

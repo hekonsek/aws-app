@@ -10,31 +10,31 @@ import (
 	"os/exec"
 )
 
-var stepCloneApp string
-
 func init() {
-	stepCloneCommand.Flags().StringVarP(&stepCloneApp, "app", "", "", "")
-
 	stepCommand.AddCommand(stepCloneCommand)
 }
 
 var stepCloneCommand = &cobra.Command{
 	Use: "clone",
 	Run: func(cmd *cobra.Command, args []string) {
-		sess, err := awsom.CreateSession()
+		applicationName := awsom.ApplicationNameFromCurrentBuild()
+
+		codePipelineService, err := awsom.CodePipelineService()
 		if err != nil {
 			panic(err)
 		}
-		codePipelineService := codepipeline.New(sess)
-		pipeline, err := codePipelineService.GetPipeline(&codepipeline.GetPipelineInput{Name: aws.String(stepCloneApp)})
+		pipeline, err := codePipelineService.GetPipeline(&codepipeline.GetPipelineInput{Name: aws.String(applicationName)})
 		if err != nil {
 			panic(err)
 		}
 		gitHubOwner := *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Owner"]
 		gitHubRepo := *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Repo"]
 
-		secretsManagerService := secretsmanager.New(sess)
-		token, err := secretsManagerService.GetSecretValue(&secretsmanager.GetSecretValueInput{SecretId: aws.String(stepCloneApp)})
+		secretsManagerService, err := awsom.SecretsManagerService()
+		if err != nil {
+			panic(err)
+		}
+		token, err := secretsManagerService.GetSecretValue(&secretsmanager.GetSecretValueInput{SecretId: aws.String(applicationName)})
 		if err != nil {
 			panic(err)
 		}

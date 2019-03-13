@@ -26,7 +26,38 @@ const PolicyAWSCodePipelineReadOnlyAccess = "arn:aws:iam::aws:policy/AWSCodePipe
 
 const PolicyIAMReadOnlyAccess = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
 
-// Role CRUD
+// Service
+
+func iamService() (*iam.IAM, error) {
+	sess, err := CreateSession()
+	if err != nil {
+		return nil, err
+	}
+	return iam.New(sess), nil
+}
+
+// Account
+
+const codeBuildEnvBuildArn = "CODEBUILD_BUILD_ARN"
+
+func AccountId() (string, error) {
+	if os.Getenv(codeBuildEnvBuildArn) == "" {
+		iamService, err := iamService()
+		if err != nil {
+			return "", err
+		}
+		user, err := iamService.GetUser(&iam.GetUserInput{})
+		if err != nil {
+			return "", err
+		}
+		arnWithoutPrefix := strings.Replace(*user.User.Arn, "arn:aws:iam::", "", 1)
+		return strings.Split(arnWithoutPrefix, ":")[0], nil
+	} else {
+		return strings.Split(os.Getenv(codeBuildEnvBuildArn), ":")[4], nil
+	}
+}
+
+// Role
 
 type Role struct {
 	Name                     string
@@ -100,33 +131,6 @@ func DeleteRole(roleName string) error {
 	}
 
 	return nil
-}
-
-// Role helpers
-
-func iamService() (*iam.IAM, error) {
-	sess, err := CreateSession()
-	if err != nil {
-		return nil, err
-	}
-	return iam.New(sess), nil
-}
-
-func AccountId() (string, error) {
-	if os.Getenv("CODEBUILD_BUILD_ARN") == "" {
-		iamService, err := iamService()
-		if err != nil {
-			return "", err
-		}
-		user, err := iamService.GetUser(&iam.GetUserInput{})
-		if err != nil {
-			return "", err
-		}
-		arnWithoutPrefix := strings.Replace(*user.User.Arn, "arn:aws:iam::", "", 1)
-		return strings.Split(arnWithoutPrefix, ":")[0], nil
-	} else {
-		return strings.Split(os.Getenv("CODEBUILD_BUILD_ARN"), ":")[4], nil
-	}
 }
 
 func RoleArn(roleName string) (string, error) {
