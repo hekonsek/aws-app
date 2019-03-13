@@ -7,6 +7,7 @@ import (
 	"github.com/go-errors/errors"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -19,6 +20,11 @@ func RandomName() string {
 
 func CliError(err error) {
 	fmt.Printf("Something went wrong: %s", err)
+}
+
+func ExitOnCliError(err error) {
+	CliError(err)
+	os.Exit(1)
 }
 
 func CliCapture(handler func() error) (string, error) {
@@ -49,4 +55,18 @@ func CliCapture(handler func() error) (string, error) {
 	out := <-channelOut
 
 	return out, nil
+}
+
+type Exec struct {
+	Command    string
+	WorkingDir string
+}
+
+func (exe Exec) Run() ([]string, error) {
+	parsedCommand := strings.Split(exe.Command, " ")
+	cmd := exec.Command(parsedCommand[0], parsedCommand[1:]...)
+	cmd.Dir = exe.WorkingDir
+	stdoutStderr, err := cmd.CombinedOutput()
+	outputLines := strings.Split(string(stdoutStderr), "\n")
+	return outputLines[0 : len(outputLines)-1], err
 }
