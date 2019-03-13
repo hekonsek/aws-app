@@ -14,7 +14,7 @@ func TestCodeBuildRoleExists(t *testing.T) {
 	// Given
 	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
 	assert.NoError(t, err)
-	roleName := RandomName()
+	roleName := GenerateLowercaseName()
 
 	// When
 	arn, err := (&Role{
@@ -37,7 +37,7 @@ func TestRoleHasPolicy(t *testing.T) {
 	// Given
 	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
 	assert.NoError(t, err)
-	roleName := RandomName()
+	roleName := GenerateLowercaseName()
 
 	// When
 	_, err = (&Role{

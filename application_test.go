@@ -8,7 +8,7 @@ import "github.com/stretchr/testify/assert"
 func TestCreateApplication(t *testing.T) {
 	// Given
 	t.Parallel()
-	name := RandomName()
+	name := GenerateLowercaseName()
 
 	// When
 	err := (&Application{

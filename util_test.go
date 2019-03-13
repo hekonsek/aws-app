@@ -6,6 +6,13 @@ import (
 )
 import "github.com/go-errors/errors"
 
+func TestGenerateLowercaseNameWithHash(t *testing.T) {
+	t.Parallel()
+
+	name := GenerateLowercaseNameWithHash()
+	assert.NotEmpty(t, name)
+}
+
 func TestCliCapture(t *testing.T) {
 	output, err := CliCapture(func() error {
 		CliError(errors.New("someError"))

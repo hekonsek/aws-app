@@ -8,7 +8,7 @@ import "github.com/stretchr/testify/assert"
 func TestCreateBucket(t *testing.T) {
 	// Given
 	t.Parallel()
-	name := RandomName()
+	name := GenerateLowercaseName()
 
 	// When
 	err := (&S3Bucket{

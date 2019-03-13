@@ -8,7 +8,7 @@ import "github.com/stretchr/testify/assert"
 func TestRepositoryDoesntExist(t *testing.T) {
 	t.Parallel()
 
-	repositoryUri, err := EcrRepositoryExists(RandomName())
+	repositoryUri, err := EcrRepositoryExists(GenerateLowercaseName())
 	assert.NoError(t, err)
 	assert.Empty(t, repositoryUri)
 }
@@ -16,7 +16,7 @@ func TestRepositoryDoesntExist(t *testing.T) {
 func TestEnsureRepositoryDoesntExist(t *testing.T) {
 	t.Parallel()
 
-	repositoryUri, err := EnsureEcrRepositoryExists(RandomName())
+	repositoryUri, err := EnsureEcrRepositoryExists(GenerateLowercaseName())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, repositoryUri)
 }
