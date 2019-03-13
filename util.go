@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-
 const UnixExitCodeGeneralError = 1
 
 func GenerateLowercaseName() string {
@@ -38,8 +37,10 @@ func CliError(err error) {
 }
 
 func ExitOnCliError(err error) {
-	CliError(err)
-	os.Exit(1)
+	if err != nil {
+		CliError(err)
+		os.Exit(1)
+	}
 }
 
 func CliCapture(handler func() error) (string, error) {

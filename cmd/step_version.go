@@ -8,8 +8,6 @@ import (
 	"github.com/hekonsek/awsom"
 	"github.com/spf13/cobra"
 	"os/exec"
-	"strconv"
-	"strings"
 )
 
 func init() {
@@ -40,33 +38,12 @@ var stepVersionCommand = &cobra.Command{
 		}
 		gitHubToken := *token.SecretString
 
-		cmdx := exec.Command("git", "tag", "-l")
+		version, err := awsom.NextVersion("cloned")
+		awsom.ExitOnCliError(err)
+
+		cmdx := exec.Command("git", "tag", version)
 		cmdx.Dir = "cloned"
 		stdoutStderr, err := cmdx.CombinedOutput()
-		if err != nil {
-			fmt.Println(string(stdoutStderr))
-			fmt.Println()
-			panic(err)
-		} else {
-			fmt.Println(string(stdoutStderr))
-		}
-
-		version := ""
-		if string(stdoutStderr) == "" {
-			version = "0.0"
-		} else {
-			version = strings.Split(string(stdoutStderr), "\n")[len(strings.Split(string(stdoutStderr), "\n"))-2]
-			versionNumber, err := strconv.ParseInt(strings.Split(version, ".")[1], 0, 64)
-			if err != nil {
-				panic(err)
-			}
-			versionNumber++
-			version = fmt.Sprintf("0.%d", versionNumber)
-		}
-
-		cmdx = exec.Command("git", "tag", version)
-		cmdx.Dir = "cloned"
-		stdoutStderr, err = cmdx.CombinedOutput()
 		if err != nil {
 			fmt.Println(string(stdoutStderr))
 			fmt.Println()
