@@ -67,7 +67,7 @@ func (application *Application) CreateOrUpdate() error {
 		return err
 	}
 	err = ApplyCodeBuildDefaults(CodeBuild{
-		Name:       VersionStageName(application.Name),
+		Name:       ConfigureStageName(application.Name),
 		GitUrl:     application.GitUrl,
 		BuildSpec:  fmt.Sprintf("\"%s\"", configureBuildSpec),
 		BuildImage: "hekonsek/awsom",
