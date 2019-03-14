@@ -27,7 +27,7 @@ func (application *Application) CreateOrUpdate() error {
 		panic(err)
 	}
 	secretsManagerService := secretsmanager.New(sess)
-	secrets, err := secretsManagerService.ListSecrets(&secretsmanager.ListSecretsInput{})
+	secrets, err := secretsManagerService.ListSecrets(&secretsmanager.ListSecretsInput{MaxResults: aws.Int64(100)})
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +69,7 @@ func (application *Application) CreateOrUpdate() error {
 	err = ApplyCodeBuildDefaults(CodeBuild{
 		Name:       DockerizeStageName(application.Name),
 		GitUrl:     application.GitUrl,
-		BuildSpec:  "buildspec-docker.yml",
+		BuildSpec:  "buildspec-dockerize.yml",
 		BuildImage: "aws/codebuild/docker:18.09.0",
 	}).CreateOrUpdate()
 	if err != nil {

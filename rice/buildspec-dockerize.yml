@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - $(aws ecr get-login --region $AWS_REGION --no-include-email)
+      - REPOSITORY=`./awsom step ecr`
+      - VERSION=`./awsom step version-current`
+  build:
+    commands:
+      - docker build -t $REPOSITORY:$VERSION .
+      - docker push $REPOSITORY:$VERSION
+artifacts:
+  files:
+    - imageDetail.json

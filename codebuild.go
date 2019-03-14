@@ -18,7 +18,7 @@ type CodeBuild struct {
 
 func ApplyCodeBuildDefaults(codeBuild CodeBuild) *CodeBuild {
 	if codeBuild.BuildSpec == "" {
-		codeBuild.BuildSpec = "buildspec.yml"
+		codeBuild.BuildSpec = "buildspec-build.yml"
 	}
 	if codeBuild.BuildImage == "" {
 		codeBuild.BuildImage = "aws/codebuild/java:openjdk-11"
