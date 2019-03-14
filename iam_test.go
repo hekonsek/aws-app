@@ -3,6 +3,7 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/hekonsek/awsom/random-strings"
 	"strconv"
 	"testing"
 )
@@ -14,7 +15,7 @@ func TestCodeBuildRoleExists(t *testing.T) {
 	// Given
 	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
 	assert.NoError(t, err)
-	roleName := GenerateLowercaseName()
+	roleName := randomstrings.GenerateLowercaseNameWithHash()
 
 	// When
 	arn, err := (&Role{
@@ -37,7 +38,7 @@ func TestRoleHasPolicy(t *testing.T) {
 	// Given
 	assumeRolePolicyDocument, err := AssumeServiceRolePolicyDocument("codebuild.amazonaws.com")
 	assert.NoError(t, err)
-	roleName := GenerateLowercaseName()
+	roleName := randomstrings.GenerateLowercaseNameWithHash()
 
 	// When
 	_, err = (&Role{

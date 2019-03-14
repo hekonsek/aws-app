@@ -1,6 +1,7 @@
 package awsom
 
 import (
+	"github.com/hekonsek/awsom/random-strings"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ func TestCreateBucket(t *testing.T) {
 	t.Parallel()
 
 	// Given
-	name := GenerateLowercaseNameWithHash()
+	name := randomstrings.GenerateLowercaseNameWithHash()
 	defer func() {
 		err := DeleteS3Bucket(name)
 		assert.NoError(t, err)
@@ -31,7 +32,7 @@ func TestDetectingNonExistingBucket(t *testing.T) {
 	t.Parallel()
 
 	// When
-	exists, err := S3BucketExists(GenerateLowercaseNameWithHash())
+	exists, err := S3BucketExists(randomstrings.GenerateLowercaseNameWithHash())
 
 	// Then
 	assert.NoError(t, err)

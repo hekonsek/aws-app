@@ -2,35 +2,15 @@ package awsom
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"fmt"
-	"github.com/Pallinder/sillyname-go"
 	"github.com/go-errors/errors"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 const UnixExitCodeGeneralError = 1
-
-func GenerateLowercaseName() string {
-	lowerCased := strings.ToLower(sillyname.GenerateStupidName())
-	return strings.Replace(lowerCased, " ", "", -1)
-}
-
-func GenerateLowercaseNameWithHash() string {
-	lowerCased := strings.ToLower(sillyname.GenerateStupidName())
-	name := strings.Replace(lowerCased, " ", "", -1)
-
-	hash := sha1.New()
-	hash.Write([]byte(time.Now().Format(time.RFC850)))
-	hashString := fmt.Sprintf("%x\n", hash.Sum(nil))
-	nameWithHash := name + hashString[:6]
-
-	return nameWithHash
-}
 
 func CliError(err error) {
 	fmt.Printf("Something went wrong: %s", err)

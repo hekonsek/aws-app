@@ -1,6 +1,7 @@
 package awsom
 
 import (
+	"github.com/hekonsek/awsom/random-strings"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ func TestCreateApplication(t *testing.T) {
 	t.Parallel()
 
 	// Given
-	name := GenerateLowercaseName()
+	name := randomstrings.GenerateLowercaseNameWithHash()
 	defer func() {
 		err := DeleteApplication(name)
 		assert.NoError(t, err)
