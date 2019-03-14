@@ -3,7 +3,7 @@ PACKAGES := github.com/hekonsek/awsom github.com/hekonsek/awsom/cmd github.com/h
 all: format rice silent-test build
 
 rice:
-	rice embed-go
+	rice embed-go -i $(echo $PACKAGES | sed -e 's/ / -i /g')
 
 build:
 	GO111MODULE=on go build main/awsom.go
