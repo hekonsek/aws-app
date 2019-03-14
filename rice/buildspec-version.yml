@@ -4,6 +4,7 @@ phases:
   build:
     commands:
       - cp /usr/bin/awsom awsom
+      - ./awsom app configure
       - ./awsom step clone
       - ./awsom step version
 artifacts:
