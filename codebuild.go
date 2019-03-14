@@ -27,6 +27,12 @@ func ApplyCodeBuildDefaults(codeBuild CodeBuild) *CodeBuild {
 }
 
 func (codeBuild *CodeBuild) CreateOrUpdate() error {
+	projectArtifactsBucket := codeBuild.Name + "-codebuild-artifacts"
+	err := (&S3Bucket{Name: projectArtifactsBucket}).CreateOrUpdate()
+	if err != nil {
+		return err
+	}
+
 	sess, err := CreateSession()
 	if err != nil {
 		return err
@@ -75,7 +81,7 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 		},
 		Artifacts: &codebuild.ProjectArtifacts{
 			Type:     aws.String(codebuild.ArtifactsTypeS3),
-			Location: aws.String("capsilon-hekonsek"),
+			Location: aws.String(projectArtifactsBucket),
 		},
 	})
 	if err != nil {

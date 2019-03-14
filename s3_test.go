@@ -6,9 +6,10 @@ import (
 import "github.com/stretchr/testify/assert"
 
 func TestCreateBucket(t *testing.T) {
-	// Given
 	t.Parallel()
-	name := GenerateLowercaseName()
+
+	// Given
+	name := GenerateLowercaseNameWithHash()
 
 	// When
 	err := (&S3Bucket{
@@ -24,4 +25,15 @@ func TestCreateBucket(t *testing.T) {
 	// Clean up
 	err = DeleteS3Bucket(name)
 	assert.NoError(t, err)
+}
+
+func TestDetectingNonExistingBucket(t *testing.T) {
+	t.Parallel()
+
+	// When
+	exists, err := S3BucketExists(GenerateLowercaseNameWithHash())
+
+	// Then
+	assert.NoError(t, err)
+	assert.False(t, exists)
 }

@@ -16,11 +16,17 @@ func (bucket *S3Bucket) CreateOrUpdate() error {
 	}
 	s3Service := s3.New(sess)
 
-	_, err = s3Service.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(bucket.Name),
-	})
+	bucketExists, err := S3BucketExists(bucket.Name)
 	if err != nil {
 		return err
+	}
+	if !bucketExists {
+		_, err = s3Service.CreateBucket(&s3.CreateBucketInput{
+			Bucket: aws.String(bucket.Name),
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
