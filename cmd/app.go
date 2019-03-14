@@ -1,16 +1,18 @@
 package cmd
 
 import (
+	"github.com/hekonsek/awsom"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	rootCmd.AddCommand(appCommand)
+	RootCmd.AddCommand(appCommand)
 }
 
 var appCommand = &cobra.Command{
-	Use: "app",
+	Use:   "app",
+	Short: "Commands related to applications (CI/CD pipelines) defined in AWS.",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		awsom.ExitOnCliError(cmd.Help())
 	},
 }

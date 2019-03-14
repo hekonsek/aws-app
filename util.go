@@ -39,7 +39,7 @@ func CliError(err error) {
 func ExitOnCliError(err error) {
 	if err != nil {
 		CliError(err)
-		os.Exit(1)
+		os.Exit(UnixExitCodeGeneralError)
 	}
 }
 

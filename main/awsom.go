@@ -1,7 +1,10 @@
 package main
 
-import "github.com/hekonsek/awsom/cmd"
+import (
+	"github.com/hekonsek/awsom"
+	"github.com/hekonsek/awsom/cmd"
+)
 
 func main() {
-	cmd.ExecuteRootCmd()
+	awsom.ExitOnCliError(cmd.RootCmd.Execute())
 }

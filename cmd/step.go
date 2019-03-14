@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(stepCommand)
+	RootCmd.AddCommand(stepCommand)
 }
 
 var stepCommand = &cobra.Command{
