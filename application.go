@@ -2,7 +2,6 @@ package awsom
 
 import (
 	"errors"
-	"fmt"
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
@@ -51,7 +50,7 @@ func (application *Application) CreateOrUpdate() error {
 	}
 
 	err = ApplyCodeBuildDefaults(CodeBuild{
-		Name:   application.Name,
+		Name:   BuildStageName(application.Name),
 		GitUrl: application.GitUrl,
 	}).CreateOrUpdate()
 	if err != nil {
@@ -69,7 +68,7 @@ func (application *Application) CreateOrUpdate() error {
 	err = ApplyCodeBuildDefaults(CodeBuild{
 		Name:       ConfigureStageName(application.Name),
 		GitUrl:     application.GitUrl,
-		BuildSpec:  fmt.Sprintf("\"%s\"", configureBuildSpec),
+		BuildSpec:  configureBuildSpec,
 		BuildImage: "hekonsek/awsom",
 	}).CreateOrUpdate()
 	if err != nil {

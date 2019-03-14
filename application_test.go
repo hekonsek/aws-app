@@ -6,9 +6,23 @@ import (
 import "github.com/stretchr/testify/assert"
 
 func TestCreateApplication(t *testing.T) {
-	// Given
 	t.Parallel()
+
+	// Given
 	name := GenerateLowercaseName()
+	defer func() {
+		err := DeleteApplication(name)
+		assert.NoError(t, err)
+		for _, bucket := range []string{
+			ConfigureStageName(name) + "-codebuild-artifacts",
+			VersionStageName(name) + "-codebuild-artifacts",
+			BuildStageName(name) + "-codebuild-artifacts",
+			DockerizeStageName(name) + "-codebuild-artifacts"} {
+			println("Deleting " + bucket)
+			err = DeleteS3Bucket(bucket)
+			assert.NoError(t, err)
+		}
+	}()
 
 	// When
 	err := (&Application{
@@ -17,9 +31,5 @@ func TestCreateApplication(t *testing.T) {
 	}).CreateOrUpdate()
 
 	// Then
-	assert.NoError(t, err)
-
-	// Clean up
-	err = DeleteApplication(name)
 	assert.NoError(t, err)
 }

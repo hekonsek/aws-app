@@ -168,7 +168,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 								Version:  aws.String("1"),
 							},
 							Configuration: map[string]*string{
-								"ProjectName": aws.String(codePipeline.Name),
+								"ProjectName": aws.String(BuildStageName(codePipeline.Name)),
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
 								{
@@ -252,6 +252,11 @@ func DeleteCodePipeline(name string) error {
 		return err
 	}
 
+	err = DeleteS3Bucket(name)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -261,6 +266,10 @@ func ConfigureStageName(name string) string {
 
 func VersionStageName(name string) string {
 	return name + "-version"
+}
+
+func BuildStageName(name string) string {
+	return name + "-build"
 }
 
 func DockerizeStageName(name string) string {

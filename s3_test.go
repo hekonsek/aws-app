@@ -10,6 +10,10 @@ func TestCreateBucket(t *testing.T) {
 
 	// Given
 	name := GenerateLowercaseNameWithHash()
+	defer func() {
+		err := DeleteS3Bucket(name)
+		assert.NoError(t, err)
+	}()
 
 	// When
 	err := (&S3Bucket{
@@ -21,10 +25,6 @@ func TestCreateBucket(t *testing.T) {
 	exists, err := S3BucketExists(name)
 	assert.NoError(t, err)
 	assert.True(t, exists)
-
-	// Clean up
-	err = DeleteS3Bucket(name)
-	assert.NoError(t, err)
 }
 
 func TestDetectingNonExistingBucket(t *testing.T) {
