@@ -3,8 +3,8 @@ version: 0.2
 phases:
   build:
     commands:
-      - ./awsom step clone
-      - ./awsom step version
+      - cp /usr/bin/awsom awsom
+      - ./awsom app configure
 artifacts:
   files:
     - "**/*"

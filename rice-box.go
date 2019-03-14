@@ -28,28 +28,35 @@ func init() {
 		Content: string("version: 0.2\n\nphases:\n  build:\n    commands:\n      - mvn test package\nartifacts:\n  files:\n    - \"**/*\""),
 	}
 	file5 := &embedded.EmbeddedFile{
+		Filename:    "buildspec-configure.yml",
+		FileModTime: time.Unix(1552569626, 0),
+
+		Content: string("version: 0.2\n\nphases:\n  build:\n    commands:\n      - cp /usr/bin/awsom awsom\n      - ./awsom app configure\nartifacts:\n  files:\n    - \"**/*\""),
+	}
+	file6 := &embedded.EmbeddedFile{
 		Filename:    "buildspec-dockerize.yml",
 		FileModTime: time.Unix(1552549826, 0),
 
 		Content: string("version: 0.2\n\nphases:\n  pre_build:\n    commands:\n      - $(aws ecr get-login --region $AWS_REGION --no-include-email)\n      - REPOSITORY=`./awsom step ecr`\n      - VERSION=`./awsom step version-current`\n  build:\n    commands:\n      - docker build -t $REPOSITORY:$VERSION .\n      - docker push $REPOSITORY:$VERSION\nartifacts:\n  files:\n    - imageDetail.json"),
 	}
-	file6 := &embedded.EmbeddedFile{
+	file7 := &embedded.EmbeddedFile{
 		Filename:    "buildspec-version.yml",
-		FileModTime: time.Unix(1552563244, 0),
+		FileModTime: time.Unix(1552569626, 0),
 
-		Content: string("version: 0.2\n\nphases:\n  build:\n    commands:\n      - cp /usr/bin/awsom awsom\n      - ./awsom app configure\n      - ./awsom step clone\n      - ./awsom step version\nartifacts:\n  files:\n    - \"**/*\""),
+		Content: string("version: 0.2\n\nphases:\n  build:\n    commands:\n      - ./awsom step clone\n      - ./awsom step version\nartifacts:\n  files:\n    - \"**/*\""),
 	}
 
 	// define dirs
 	dir1 := &embedded.EmbeddedDir{
 		Filename:   "",
-		DirModTime: time.Unix(1552563244, 0),
+		DirModTime: time.Unix(1552569626, 0),
 		ChildFiles: []*embedded.EmbeddedFile{
 			file2, // "Dockerfile"
 			file3, // "assume_service_role_template.json"
 			file4, // "buildspec-build.yml"
-			file5, // "buildspec-dockerize.yml"
-			file6, // "buildspec-version.yml"
+			file5, // "buildspec-configure.yml"
+			file6, // "buildspec-dockerize.yml"
+			file7, // "buildspec-version.yml"
 
 		},
 	}
@@ -60,7 +67,7 @@ func init() {
 	// register embeddedBox
 	embedded.RegisterEmbeddedBox(`rice`, &embedded.EmbeddedBox{
 		Name: `rice`,
-		Time: time.Unix(1552563244, 0),
+		Time: time.Unix(1552569626, 0),
 		Dirs: map[string]*embedded.EmbeddedDir{
 			"": dir1,
 		},
@@ -68,8 +75,9 @@ func init() {
 			"Dockerfile":                        file2,
 			"assume_service_role_template.json": file3,
 			"buildspec-build.yml":               file4,
-			"buildspec-dockerize.yml":           file5,
-			"buildspec-version.yml":             file6,
+			"buildspec-configure.yml":           file5,
+			"buildspec-dockerize.yml":           file6,
+			"buildspec-version.yml":             file7,
 		},
 	})
 }

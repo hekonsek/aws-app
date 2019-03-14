@@ -103,6 +103,33 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 					},
 				},
 				{
+					Name: aws.String("configure"),
+					Actions: []*codepipeline.ActionDeclaration{
+						{
+							Name: aws.String("configure"),
+							ActionTypeId: &codepipeline.ActionTypeId{
+								Owner:    aws.String(codepipeline.ActionOwnerAws),
+								Provider: aws.String("CodeBuild"),
+								Category: aws.String(codepipeline.ActionCategoryBuild),
+								Version:  aws.String("1"),
+							},
+							Configuration: map[string]*string{
+								"ProjectName": aws.String(ConfigureStageName(codePipeline.Name)),
+							},
+							InputArtifacts: []*codepipeline.InputArtifact{
+								{
+									Name: aws.String("source"),
+								},
+							},
+							OutputArtifacts: []*codepipeline.OutputArtifact{
+								{
+									Name: aws.String("configured-source"),
+								},
+							},
+						},
+					},
+				},
+				{
 					Name: aws.String("version"),
 					Actions: []*codepipeline.ActionDeclaration{
 						{
@@ -118,7 +145,7 @@ func (codePipeline *CodePipeline) CreateOrUpdate() error {
 							},
 							InputArtifacts: []*codepipeline.InputArtifact{
 								{
-									Name: aws.String("source"),
+									Name: aws.String("configured-source"),
 								},
 							},
 							OutputArtifacts: []*codepipeline.OutputArtifact{
@@ -226,6 +253,10 @@ func DeleteCodePipeline(name string) error {
 	}
 
 	return nil
+}
+
+func ConfigureStageName(name string) string {
+	return name + "-configure"
 }
 
 func VersionStageName(name string) string {

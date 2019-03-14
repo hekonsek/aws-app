@@ -2,6 +2,8 @@ package awsom
 
 import (
 	"errors"
+	"fmt"
+	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"os"
@@ -51,6 +53,24 @@ func (application *Application) CreateOrUpdate() error {
 	err = ApplyCodeBuildDefaults(CodeBuild{
 		Name:   application.Name,
 		GitUrl: application.GitUrl,
+	}).CreateOrUpdate()
+	if err != nil {
+		return err
+	}
+
+	box, err := rice.FindBox("rice")
+	if err != nil {
+		return err
+	}
+	configureBuildSpec, err := box.String("buildspec-configure.yml")
+	if err != nil {
+		return err
+	}
+	err = ApplyCodeBuildDefaults(CodeBuild{
+		Name:       VersionStageName(application.Name),
+		GitUrl:     application.GitUrl,
+		BuildSpec:  fmt.Sprintf("\"%s\"", configureBuildSpec),
+		BuildImage: "hekonsek/awsom",
 	}).CreateOrUpdate()
 	if err != nil {
 		return err
