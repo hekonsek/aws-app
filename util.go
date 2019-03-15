@@ -13,14 +13,14 @@ import (
 const UnixExitCodeGeneralError = 1
 
 func CliError(err error) {
-	fmt.Printf("Something went wrong: %s", err)
+	if err != nil {
+		fmt.Printf("Something went wrong: %s", err)
+	}
 }
 
 func ExitOnCliError(err error) {
-	if err != nil {
-		CliError(err)
-		os.Exit(UnixExitCodeGeneralError)
-	}
+	CliError(err)
+	os.Exit(UnixExitCodeGeneralError)
 }
 
 func CliCapture(handler func() error) (string, error) {

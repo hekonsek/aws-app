@@ -11,13 +11,12 @@ func init() {
 }
 
 var stepEcrCommand = &cobra.Command{
-	Use: "ecr",
+	Use:   "ecr",
+	Short: "Returns ECR repository URI for a current application. Creates new repository if necessary.",
 	Run: func(cmd *cobra.Command, args []string) {
 		applicationName := awsom.ApplicationNameFromCurrentBuild()
 		repositoryUri, err := awsom.EnsureEcrRepositoryExists(applicationName)
-		if err != nil {
-			panic(err)
-		}
+		awsom.ExitOnCliError(err)
 		fmt.Println(repositoryUri)
 	},
 }

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/codepipeline"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hekonsek/awsom"
 	"github.com/spf13/cobra"
@@ -19,16 +18,8 @@ var stepCloneCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		applicationName := awsom.ApplicationNameFromCurrentBuild()
 
-		codePipelineService, err := awsom.CodePipelineService()
-		if err != nil {
-			panic(err)
-		}
-		pipeline, err := codePipelineService.GetPipeline(&codepipeline.GetPipelineInput{Name: aws.String(applicationName)})
-		if err != nil {
-			panic(err)
-		}
-		gitHubOwner := *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Owner"]
-		gitHubRepo := *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Repo"]
+		gitHubOwner, gitHubRepo, err := awsom.ReadPipelineSource(applicationName)
+		awsom.ExitOnCliError(err)
 
 		secretsManagerService, err := awsom.SecretsManagerService()
 		if err != nil {

@@ -260,6 +260,54 @@ func DeleteCodePipeline(name string) error {
 	return nil
 }
 
+func PipelineExists(name string) (exists bool, err error) {
+	codePipelineService, err := CodePipelineService()
+	if err != nil {
+		return
+	}
+
+	pipelines, err := codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{})
+	for len(pipelines.Pipelines) > 0 {
+		for _, pipeline := range pipelines.Pipelines {
+			if *pipeline.Name == name {
+				return true, err
+			}
+		}
+		if pipelines.NextToken != nil {
+			pipelines, err = codePipelineService.ListPipelines(&codepipeline.ListPipelinesInput{
+				NextToken: pipelines.NextToken,
+			})
+		} else {
+			break
+		}
+	}
+
+	return
+}
+
+func ReadPipelineSource(pipelineName string) (owner string, repo string, err error) {
+	codePipelineService, err := CodePipelineService()
+	if err != nil {
+		return
+	}
+
+	exists, err := PipelineExists(pipelineName)
+	if err != nil {
+		return
+	}
+	if !exists {
+		return
+	}
+
+	pipeline, err := codePipelineService.GetPipeline(&codepipeline.GetPipelineInput{Name: aws.String(pipelineName)})
+	if err != nil {
+		return
+	}
+	owner = *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Owner"]
+	repo = *pipeline.Pipeline.Stages[0].Actions[0].Configuration["Repo"]
+	return
+}
+
 func ConfigureStageName(name string) string {
 	return name + "-configure"
 }
