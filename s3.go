@@ -56,6 +56,22 @@ func DeleteS3Bucket(name string) error {
 	}
 	s3Service := s3.New(sess)
 
+	objects, err := s3Service.ListObjects(&s3.ListObjectsInput{
+		Bucket: aws.String(name),
+	})
+	if err != nil {
+		return err
+	}
+	for _, object := range objects.Contents {
+		_, err = s3Service.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(name),
+			Key:    object.Key,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	_, err = s3Service.DeleteBucket(&s3.DeleteBucketInput{
 		Bucket: aws.String(name),
 	})
