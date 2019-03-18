@@ -11,9 +11,9 @@ func init() {
 	// define files
 	file2 := &embedded.EmbeddedFile{
 		Filename:    "Dockerfile",
-		FileModTime: time.Unix(1552547852, 0),
+		FileModTime: time.Unix(1552921724, 0),
 
-		Content: string("FROM openjdk:11-jre\n\nRUN mkdir /app\nADD target/*.jar /app\n\nCMD [\"/usr/bin/java\", \"-jar\", \"/app/*.jar\"]\n"),
+		Content: string("FROM openjdk:11-jre\n\nRUN mkdir /app\nADD target/*.jar /app/app.jar\n\nCMD [\"/usr/bin/java\", \"-jar\", \"/app/app.jar\"]\n"),
 	}
 	file3 := &embedded.EmbeddedFile{
 		Filename:    "assume_service_role_template.json",
@@ -49,7 +49,7 @@ func init() {
 	// define dirs
 	dir1 := &embedded.EmbeddedDir{
 		Filename:   "",
-		DirModTime: time.Unix(1552569626, 0),
+		DirModTime: time.Unix(1552921725, 0),
 		ChildFiles: []*embedded.EmbeddedFile{
 			file2, // "Dockerfile"
 			file3, // "assume_service_role_template.json"
@@ -67,7 +67,7 @@ func init() {
 	// register embeddedBox
 	embedded.RegisterEmbeddedBox(`rice`, &embedded.EmbeddedBox{
 		Name: `rice`,
-		Time: time.Unix(1552569626, 0),
+		Time: time.Unix(1552921725, 0),
 		Dirs: map[string]*embedded.EmbeddedDir{
 			"": dir1,
 		},
