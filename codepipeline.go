@@ -1,8 +1,10 @@
 package awsom
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/codepipeline"
+	"github.com/go-errors/errors"
 	"os"
 	"strings"
 )
@@ -254,7 +256,7 @@ func DeleteCodePipeline(name string) error {
 
 	err = DeleteS3Bucket(name)
 	if err != nil {
-		return err
+		return errors.WrapPrefix(err, fmt.Sprintf("cannot remove bucket %s", name), 0)
 	}
 
 	return nil
