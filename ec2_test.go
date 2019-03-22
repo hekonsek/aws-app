@@ -21,7 +21,8 @@ func TestCreatePublicVpc(t *testing.T) {
 		Name:      name,
 		CidrBlock: "10.0.0.0/16",
 		Subnets: []Subnet{
-			{Cidr: "10.0.0.0/18"},
+			{Cidr: "10.0.0.0/18", AvailabilityZone: "us-east-1a"},
+			{Cidr: "10.0.64.0/18", AvailabilityZone: "us-east-1b"},
 		},
 	}).CreateOrUpdate()
 

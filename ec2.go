@@ -21,7 +21,8 @@ type Vpc struct {
 }
 
 type Subnet struct {
-	Cidr string
+	Cidr             string
+	AvailabilityZone string
 }
 
 func (vpc *Vpc) CreateOrUpdate() error {
@@ -51,8 +52,9 @@ func (vpc *Vpc) CreateOrUpdate() error {
 
 	for _, subnet := range vpc.Subnets {
 		subnetResult, err := ec2Service.CreateSubnet(&ec2.CreateSubnetInput{
-			VpcId:     vpcCreated.Vpc.VpcId,
-			CidrBlock: aws.String(subnet.Cidr),
+			VpcId:            vpcCreated.Vpc.VpcId,
+			CidrBlock:        aws.String(subnet.Cidr),
+			AvailabilityZone: aws.String(subnet.AvailabilityZone),
 		})
 		if err != nil {
 			return err
