@@ -25,6 +25,18 @@ type Subnet struct {
 	AvailabilityZone string
 }
 
+func DefaultVpc(name string) *Vpc {
+	return &Vpc{
+		Name:      name,
+		CidrBlock: "10.0.0.0/16",
+		Subnets: []Subnet{
+			{Cidr: "10.0.0.0/18", AvailabilityZone: "us-east-1a"},
+			{Cidr: "10.0.64.0/18", AvailabilityZone: "us-east-1b"},
+			{Cidr: "10.0.128.0/18", AvailabilityZone: "us-east-1c"},
+		},
+	}
+}
+
 func (vpc *Vpc) CreateOrUpdate() error {
 	ec2Service, err := Ec2Service()
 	if err != nil {

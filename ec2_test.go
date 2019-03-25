@@ -17,14 +17,7 @@ func TestCreatePublicVpc(t *testing.T) {
 	}()
 
 	// When
-	err := (&Vpc{
-		Name:      name,
-		CidrBlock: "10.0.0.0/16",
-		Subnets: []Subnet{
-			{Cidr: "10.0.0.0/18", AvailabilityZone: "us-east-1a"},
-			{Cidr: "10.0.64.0/18", AvailabilityZone: "us-east-1b"},
-		},
-	}).CreateOrUpdate()
+	err := DefaultVpc(name).CreateOrUpdate()
 
 	// Then
 	assert.NoError(t, err)
