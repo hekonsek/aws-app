@@ -3,6 +3,7 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/go-errors/errors"
 	"strings"
 )
 
@@ -155,6 +156,10 @@ func (vpc *Vpc) CreateOrUpdate() error {
 }
 
 func VpcId(name string) (string, error) {
+	if name == "" {
+		return "", errors.New("name of VPC cannot be empty")
+	}
+
 	ec2Service, err := Ec2Service()
 	if err != nil {
 		return "", err
@@ -175,7 +180,7 @@ func VpcId(name string) (string, error) {
 	if len(vpcs.Vpcs) > 0 {
 		return *vpcs.Vpcs[0].VpcId, nil
 	} else {
-		return "", nil
+		return "", errors.New("cannot find VPC with name " + name)
 	}
 }
 
@@ -280,23 +285,13 @@ func DeleteVpc(name string) error {
 		}
 	}
 
-	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("vpc-id"),
-				Values: []*string{aws.String(vpcId)},
-			},
-		},
-	})
+	subnets, err := Subnets(name)
 	if err != nil {
 		return err
 	}
-	for _, subnet := range subnets.Subnets {
-		if err != nil {
-			return err
-		}
+	for _, subnet := range subnets {
 		_, err = ec2Service.DeleteSubnet(&ec2.DeleteSubnetInput{
-			SubnetId: subnet.SubnetId,
+			SubnetId: aws.String(subnet),
 		})
 		if err != nil {
 			return err
@@ -311,4 +306,33 @@ func DeleteVpc(name string) error {
 	}
 
 	return nil
+}
+
+func Subnets(vpcName string) ([]string, error) {
+	ec2Service, err := Ec2Service()
+	if err != nil {
+		return nil, err
+	}
+
+	vpcId, err := VpcId(vpcName)
+	if err != nil {
+		return nil, err
+	}
+
+	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("vpc-id"),
+				Values: []*string{aws.String(vpcId)},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	subnetsIds := []string{}
+	for _, subnet := range subnets.Subnets {
+		subnetsIds = append(subnetsIds, *subnet.SubnetId)
+	}
+	return subnetsIds, nil
 }
