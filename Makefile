@@ -1,4 +1,4 @@
-PACKAGES := github.com/hekonsek/awsom github.com/hekonsek/awsom/cmd github.com/hekonsek/awsom/main github.com/hekonsek/awsom/random-strings
+PACKAGES := github.com/hekonsek/awsom github.com/hekonsek/awsom/cmd github.com/hekonsek/awsom/main
 
 all: format rice silent-test build
 

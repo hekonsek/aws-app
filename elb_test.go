@@ -1,7 +1,7 @@
 package awsom
 
 import (
-	"github.com/hekonsek/awsom/random-strings"
+	"github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,7 +10,7 @@ func TestCreateLoadBalancer(t *testing.T) {
 	t.Parallel()
 
 	// Given
-	name := randomstrings.GenerateLowercaseNameWithHash()
+	name := randomstrings.ForHumanWithHash()
 	err := DefaultVpc(name).CreateOrUpdate()
 	assert.NoError(t, err)
 	defer func() {

@@ -1,7 +1,7 @@
 package awsom
 
 import (
-	"github.com/hekonsek/awsom/random-strings"
+	"github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,7 +10,7 @@ func TestCreatePublicVpc(t *testing.T) {
 	t.Parallel()
 
 	// Given
-	name := randomstrings.GenerateLowercaseNameWithHash()
+	name := randomstrings.ForHumanWithHash()
 	defer func() {
 		err := DeleteVpc(name)
 		assert.NoError(t, err)

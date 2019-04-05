@@ -1,7 +1,7 @@
 package awsom
 
 import (
-	"github.com/hekonsek/awsom/random-strings"
+	"github.com/hekonsek/random-strings"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -9,7 +9,7 @@ import "github.com/stretchr/testify/assert"
 func TestRepositoryDoesntExist(t *testing.T) {
 	t.Parallel()
 
-	repositoryUri, err := EcrRepositoryExists(randomstrings.GenerateLowercaseNameWithHash())
+	repositoryUri, err := EcrRepositoryExists(randomstrings.ForHumanWithHash())
 	assert.NoError(t, err)
 	assert.Empty(t, repositoryUri)
 }
@@ -17,7 +17,7 @@ func TestRepositoryDoesntExist(t *testing.T) {
 func TestEnsureRepositoryDoesntExist(t *testing.T) {
 	t.Parallel()
 
-	repositoryUri, err := EnsureEcrRepositoryExists(randomstrings.GenerateLowercaseNameWithHash())
+	repositoryUri, err := EnsureEcrRepositoryExists(randomstrings.ForHumanWithHash())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, repositoryUri)
 }

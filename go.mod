@@ -2,11 +2,11 @@ module github.com/hekonsek/awsom
 
 require (
 	github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a
-	github.com/Pallinder/sillyname-go v0.0.0-20130730142914-97aeae9e6ba1
 	github.com/aws/aws-sdk-go v1.16.29
 	github.com/daaku/go.zipexe v1.0.0 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/go-errors/errors v1.0.1
+	github.com/hekonsek/random-strings v0.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.6 // indirect

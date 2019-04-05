@@ -1,7 +1,7 @@
 package awsom
 
 import (
-	"github.com/hekonsek/awsom/random-strings"
+	"github.com/hekonsek/random-strings"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -9,7 +9,7 @@ import "github.com/stretchr/testify/assert"
 func TestReadNoSourceIfPipelinesDoesNotExist(t *testing.T) {
 	t.Parallel()
 
-	owner, repo, err := ReadPipelineSource(randomstrings.GenerateLowercaseNameWithHash())
+	owner, repo, err := ReadPipelineSource(randomstrings.ForHumanWithHash())
 	assert.NoError(t, err)
 	assert.Empty(t, owner)
 	assert.Empty(t, repo)
@@ -18,7 +18,7 @@ func TestReadNoSourceIfPipelinesDoesNotExist(t *testing.T) {
 func TestReadPipelineSource(t *testing.T) {
 	t.Parallel()
 
-	name := randomstrings.GenerateLowercaseNameWithHash()
+	name := randomstrings.ForHumanWithHash()
 	defer func() {
 		err := DeleteCodePipeline(name)
 		assert.NoError(t, err)
