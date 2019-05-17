@@ -1,5 +1,5 @@
-FROM fedora:29
+FROM fedora:30
 
-RUN dnf install -y git
+RUN dnf install -y --nogpgcheck git
 
 ADD awsom /usr/bin/awsom
