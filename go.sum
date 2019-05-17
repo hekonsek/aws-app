@@ -14,6 +14,8 @@ github.com/go-errors/errors v1.0.1 h1:LUHzmkK3GUKUrL/1gfBUxAHzcev3apQlezX/+O7ma6
 github.com/go-errors/errors v1.0.1/go.mod h1:f4zRHt4oKfwPJE5k8C9vpYG+aDHdBFUsgrm6/TyX73Q=
 github.com/hekonsek/awsom-session v0.0.0 h1:AE1AuZi9Ktclxq1/XoKzfYILP1YiiE1NNDS9JfTwruM=
 github.com/hekonsek/awsom-session v0.0.0/go.mod h1:UJHWn7FlbRaILPI4ZuZl30sUZNfTQPV0FjipRWfUpIE=
+github.com/hekonsek/osexit v1.0.0 h1:koUJpecRqka73vvEihi8psCPrVEPVpTTLmPlSucQJTg=
+github.com/hekonsek/osexit v1.0.0/go.mod h1:pzLM9YKwY6Nfj27mawBrkWFa0JXAoAq9eZ9DCxkoeq8=
 github.com/hekonsek/random-strings v0.0.0 h1:0yE+LGNLXaFT/5YXdhRLKpBkzktQ7yatVg6/ubR6Bsk=
 github.com/hekonsek/random-strings v0.0.0/go.mod h1:Cxe6IdFX8/0BVvDPKvz2vL8x7bksNRzxS5rOd4o1fxc=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=

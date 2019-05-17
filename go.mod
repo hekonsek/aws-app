@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/go-errors/errors v1.0.1
 	github.com/hekonsek/awsom-session v0.0.0
+	github.com/hekonsek/osexit v1.0.0
 	github.com/hekonsek/random-strings v0.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
