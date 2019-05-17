@@ -1,24 +1,20 @@
 package awsom
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/go-errors/errors"
+	"github.com/hekonsek/awsom-session"
 	"strings"
 )
 
-func Ec2Service() (*ec2.EC2, error) {
-	sess, err := CreateSession()
-	if err != nil {
-		return nil, err
-	}
-	return ec2.New(sess), nil
-}
+// Create
 
-type Vpc struct {
+type vpcBuilder struct {
 	Name      string
 	CidrBlock string
-	Subnets   []Subnet
+	Subnets   []*Subnet
 }
 
 type Subnet struct {
@@ -26,11 +22,11 @@ type Subnet struct {
 	AvailabilityZone string
 }
 
-func DefaultVpc(name string) *Vpc {
-	return &Vpc{
+func NewVpcBuilder(name string) *vpcBuilder {
+	return &vpcBuilder{
 		Name:      name,
 		CidrBlock: "10.0.0.0/16",
-		Subnets: []Subnet{
+		Subnets: []*Subnet{
 			{Cidr: "10.0.0.0/18", AvailabilityZone: "us-east-1a"},
 			{Cidr: "10.0.64.0/18", AvailabilityZone: "us-east-1b"},
 			{Cidr: "10.0.128.0/18", AvailabilityZone: "us-east-1c"},
@@ -38,8 +34,24 @@ func DefaultVpc(name string) *Vpc {
 	}
 }
 
-func (vpc *Vpc) CreateOrUpdate() error {
-	ec2Service, err := Ec2Service()
+func (vpc *vpcBuilder) WithCidrBlockPrefix(cidrBlockPrefix string) *vpcBuilder {
+	vpc.CidrBlock = cidrBlockPrefix + ".0.0/16"
+	vpc.Subnets[0].Cidr = cidrBlockPrefix + ".0.0/18"
+	vpc.Subnets[1].Cidr = cidrBlockPrefix + ".64.0/18"
+	vpc.Subnets[2].Cidr = cidrBlockPrefix + ".128.0/18"
+	return vpc
+}
+
+func (vpc *vpcBuilder) Create() error {
+	vpcExists, err := VpcExistsByName(vpc.Name)
+	if err != nil {
+		return err
+	}
+	if vpcExists {
+		return errors.New(fmt.Sprintf("VPC %s already exists.", vpc.Name))
+	}
+
+	ec2Service, err := NewEc2Service()
 	if err != nil {
 		return err
 	}
@@ -155,12 +167,59 @@ func (vpc *Vpc) CreateOrUpdate() error {
 	return nil
 }
 
+// Read
+
+func ListVpc() ([]string, error) {
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return nil, err
+	}
+
+	vpcsOutput, err := ec2Service.DescribeVpcs(&ec2.DescribeVpcsInput{})
+	if err != nil {
+		return nil, err
+	}
+	var vpcs []string
+	for _, vpc := range vpcsOutput.Vpcs {
+		for _, tag := range vpc.Tags {
+			if *tag.Key == "Name" {
+				vpcs = append(vpcs, *tag.Value)
+			}
+		}
+	}
+	return vpcs, nil
+}
+
+func VpcExistsByName(name string) (bool, error) {
+	if name == "" {
+		return false, errors.New("name of VPC cannot be empty")
+	}
+
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return false, err
+	}
+
+	vpcs, err := ec2Service.DescribeVpcs(&ec2.DescribeVpcsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("tag:Name"),
+				Values: []*string{aws.String(name)},
+			},
+		},
+	})
+	if err != nil {
+		return false, err
+	}
+	return len(vpcs.Vpcs) > 0, nil
+}
+
 func VpcId(name string) (string, error) {
 	if name == "" {
 		return "", errors.New("name of VPC cannot be empty")
 	}
 
-	ec2Service, err := Ec2Service()
+	ec2Service, err := NewEc2Service()
 	if err != nil {
 		return "", err
 	}
@@ -184,8 +243,37 @@ func VpcId(name string) (string, error) {
 	}
 }
 
+func VpcSubnetsByName(vpcName string) ([]string, error) {
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return nil, err
+	}
+
+	vpcId, err := VpcId(vpcName)
+	if err != nil {
+		return nil, err
+	}
+
+	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("vpc-id"),
+				Values: []*string{aws.String(vpcId)},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	subnetsIds := []string{}
+	for _, subnet := range subnets.Subnets {
+		subnetsIds = append(subnetsIds, *subnet.SubnetId)
+	}
+	return subnetsIds, nil
+}
+
 func SubnetId(name string) (string, error) {
-	ec2Service, err := Ec2Service()
+	ec2Service, err := NewEc2Service()
 	if err != nil {
 		return "", err
 	}
@@ -209,8 +297,10 @@ func SubnetId(name string) (string, error) {
 	}
 }
 
+// Delete
+
 func DeleteVpc(name string) error {
-	ec2Service, err := Ec2Service()
+	ec2Service, err := NewEc2Service()
 	if err != nil {
 		return err
 	}
@@ -285,7 +375,7 @@ func DeleteVpc(name string) error {
 		}
 	}
 
-	subnets, err := Subnets(name)
+	subnets, err := VpcSubnetsByName(name)
 	if err != nil {
 		return err
 	}
@@ -308,31 +398,14 @@ func DeleteVpc(name string) error {
 	return nil
 }
 
-func Subnets(vpcName string) ([]string, error) {
-	ec2Service, err := Ec2Service()
-	if err != nil {
-		return nil, err
-	}
+// Services
 
-	vpcId, err := VpcId(vpcName)
+// NewEc2Service creates new instance of AWS SDK EC2 service. Relies on "github.com/hekonsek/awsom-new-session" for
+// session conventions.
+func NewEc2Service() (*ec2.EC2, error) {
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return nil, err
 	}
-
-	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("vpc-id"),
-				Values: []*string{aws.String(vpcId)},
-			},
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	subnetsIds := []string{}
-	for _, subnet := range subnets.Subnets {
-		subnetsIds = append(subnetsIds, *subnet.SubnetId)
-	}
-	return subnetsIds, nil
+	return ec2.New(sess), nil
 }

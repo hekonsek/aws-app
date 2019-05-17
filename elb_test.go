@@ -11,7 +11,7 @@ func TestCreateLoadBalancer(t *testing.T) {
 
 	// Given
 	name := randomstrings.ForHumanWithHash()
-	err := DefaultVpc(name).CreateOrUpdate()
+	err := NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
 	defer func() {
 		err := DeleteLoadBalancer(name)

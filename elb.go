@@ -17,7 +17,7 @@ func (loadBalancer *ApplicationLoadBalancer) CreateOrUpdate() error {
 	}
 	elbService := elbv2.New(sess)
 
-	subnets, err := Subnets(loadBalancer.Name)
+	subnets, err := VpcSubnetsByName(loadBalancer.Name)
 	if err != nil {
 		return err
 	}
