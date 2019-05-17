@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hekonsek/awsom"
 	"github.com/spf13/cobra"
 )
 
@@ -9,8 +10,9 @@ func init() {
 }
 
 var stepCommand = &cobra.Command{
-	Use: "step",
+	Use:   "step",
+	Short: "Commands related to 'steps' (commands executed by CI/CD builder process).",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		awsom.ExitOnCliError(cmd.Help())
 	},
 }

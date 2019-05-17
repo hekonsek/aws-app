@@ -11,7 +11,7 @@ func init() {
 
 var envCommand = &cobra.Command{
 	Use:   "env",
-	Short: "Commands related to environments.",
+	Short: "Commands related to 'environments' (VPCs used to run applications).",
 	Run: func(cmd *cobra.Command, args []string) {
 		osexit.ExitOnError(cmd.Help())
 	},

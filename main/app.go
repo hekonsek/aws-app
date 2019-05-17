@@ -11,7 +11,7 @@ func init() {
 
 var appCommand = &cobra.Command{
 	Use:   "app",
-	Short: "Commands related to applications (CI/CD pipelines) defined in AWS.",
+	Short: "Commands related to 'applications' (CI/CD pipelines).",
 	Run: func(cmd *cobra.Command, args []string) {
 		awsom.ExitOnCliError(cmd.Help())
 	},
