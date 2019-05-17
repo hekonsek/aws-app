@@ -3,6 +3,7 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/codebuild"
+	awsom_session "github.com/hekonsek/awsom-session"
 )
 
 // Constants
@@ -33,7 +34,7 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 		return err
 	}
 
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}
@@ -92,7 +93,7 @@ func (codeBuild *CodeBuild) CreateOrUpdate() error {
 }
 
 func DeleteCodeBuild(projectName string) error {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}

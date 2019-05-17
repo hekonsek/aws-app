@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/codepipeline"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hekonsek/awsom"
+	awsom_session "github.com/hekonsek/awsom-session"
 	"github.com/spf13/cobra"
 	"os/exec"
 )
@@ -19,7 +20,7 @@ var stepVersionCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		applicationName := awsom.ApplicationNameFromCurrentBuild()
 
-		sess, err := awsom.CreateSession()
+		sess, err := awsom_session.NewSession()
 		if err != nil {
 			panic(err)
 		}

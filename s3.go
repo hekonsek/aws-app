@@ -3,6 +3,7 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	awsom_session "github.com/hekonsek/awsom-session"
 )
 
 type S3Bucket struct {
@@ -10,7 +11,7 @@ type S3Bucket struct {
 }
 
 func (bucket *S3Bucket) CreateOrUpdate() error {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}
@@ -33,7 +34,7 @@ func (bucket *S3Bucket) CreateOrUpdate() error {
 }
 
 func S3BucketExists(name string) (bool, error) {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return false, err
 	}
@@ -50,7 +51,7 @@ func S3BucketExists(name string) (bool, error) {
 }
 
 func DeleteS3Bucket(name string) error {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}

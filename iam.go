@@ -5,6 +5,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	awsom_session "github.com/hekonsek/awsom-session"
 	"os"
 	"strings"
 	"text/template"
@@ -29,7 +30,7 @@ const PolicyIAMReadOnlyAccess = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
 // Service
 
 func iamService() (*iam.IAM, error) {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return nil, err
 	}

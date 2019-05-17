@@ -3,10 +3,11 @@ package awsom
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	awsom_session "github.com/hekonsek/awsom-session"
 )
 
 func EnsureEcrRepositoryExists(name string) (string, error) {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	ecrService := ecr.New(sess)
 
 	repositoryUri, err := EcrRepositoryExists(name)
@@ -29,7 +30,7 @@ func EnsureEcrRepositoryExists(name string) (string, error) {
 }
 
 func EcrRepositoryExists(name string) (string, error) {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	ecrService := ecr.New(sess)
 
 	repositories, err := ecrService.DescribeRepositories(&ecr.DescribeRepositoriesInput{})

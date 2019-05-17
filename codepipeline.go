@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/codepipeline"
 	"github.com/go-errors/errors"
+	awsom_session "github.com/hekonsek/awsom-session"
 	"os"
 	"strings"
 )
@@ -12,7 +13,7 @@ import (
 // Service
 
 func CodePipelineService() (*codepipeline.CodePipeline, error) {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return nil, err
 	}

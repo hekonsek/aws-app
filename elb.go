@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/elbv2"
+	awsom_session "github.com/hekonsek/awsom-session"
 )
 
 type ApplicationLoadBalancer struct {
@@ -11,7 +12,7 @@ type ApplicationLoadBalancer struct {
 }
 
 func (loadBalancer *ApplicationLoadBalancer) CreateOrUpdate() error {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}
@@ -35,7 +36,7 @@ func (loadBalancer *ApplicationLoadBalancer) CreateOrUpdate() error {
 }
 
 func DeleteLoadBalancer(name string) error {
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
 	}

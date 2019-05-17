@@ -5,6 +5,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	awsom_session "github.com/hekonsek/awsom-session"
 	"os"
 	"strings"
 )
@@ -23,7 +24,7 @@ func (application *Application) CreateOrUpdate() error {
 		return errors.New(ErrorApplicationNameTooShort)
 	}
 
-	sess, err := CreateSession()
+	sess, err := awsom_session.NewSession()
 	if err != nil {
 		panic(err)
 	}
