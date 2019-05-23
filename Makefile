@@ -1,4 +1,5 @@
 PACKAGES := github.com/hekonsek/awsom github.com/hekonsek/awsom/main
+VERSION := 1.0.0
 
 all: format rice silent-test build
 
@@ -18,10 +19,10 @@ format:
 	GO111MODULE=on go fmt $(PACKAGES)
 
 docker-build: build
-	docker build -t hekonsek/awsom .
+	docker build -t hekonsek/awsom:$(VERSION) .
 
 docker-push: docker-build
-	docker push hekonsek/awsom
+	docker push hekonsek/awsom:$(VERSION)
 
 lint: format
 	~/go/bin/golint $(PACKAGES)
