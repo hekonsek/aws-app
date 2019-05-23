@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/go-errors/errors"
 	awsom_session "github.com/hekonsek/awsom-session"
+	"strings"
+	"time"
 )
 
 func EcsService() (*ecs.ECS, error) {
@@ -107,11 +110,10 @@ func NewEcsClusterBuilder(name string) *ecsClusterBuilder {
 }
 
 func (cluster *ecsClusterBuilder) Create() error {
-	sess, err := awsom_session.NewSession()
+	ecsService, err := EcsService()
 	if err != nil {
 		return err
 	}
-	ecsService := ecs.New(sess)
 
 	_, err = ecsService.CreateCluster(&ecs.CreateClusterInput{
 		ClusterName: aws.String(cluster.Name),
@@ -121,6 +123,18 @@ func (cluster *ecsClusterBuilder) Create() error {
 	}
 
 	return nil
+}
+
+func EcsClusterExistsByName(name string) (bool, error) {
+	ecsService, err := EcsService()
+	if err != nil {
+		return false, err
+	}
+
+	clusters, err := ecsService.DescribeClusters(&ecs.DescribeClustersInput{
+		Clusters: aws.StringSlice([]string{name}),
+	})
+	return len(clusters.Clusters) > 0 && *clusters.Clusters[0].Status != "INACTIVE", nil
 }
 
 func DeleteEcsCluster(clusterName string) error {
@@ -153,11 +167,19 @@ func DeleteEcsCluster(clusterName string) error {
 		}
 	}
 
-	_, err = ecsService.DeleteCluster(&ecs.DeleteClusterInput{
-		Cluster: aws.String(clusterName),
-	})
-	if err != nil {
-		return err
+	for i := 0; i < 6; i++ {
+		_, err = ecsService.DeleteCluster(&ecs.DeleteClusterInput{
+			Cluster: aws.String(clusterName),
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "The Cluster cannot be deleted while Tasks are active.") {
+				continue
+			} else {
+				return err
+			}
+		} else {
+			break
+		}
 	}
 
 	return nil
@@ -193,6 +215,25 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 	subnets, err := VpcSubnetsByName(deployment.Cluster)
 	if err != nil {
 		return err
+	}
+
+	// Service with the same name is being currently deleted - we should wait for deletion process to stop
+	for i := 0; i < 6; i++ {
+		serviceState, err := ecsService.DescribeServices(&ecs.DescribeServicesInput{
+			Services: aws.StringSlice([]string{deployment.Name}),
+			Cluster:  aws.String(deployment.Cluster),
+		})
+		if err != nil {
+			return err
+		}
+		if len(serviceState.Services) > 0 && *serviceState.Services[0].Status == "DRAINING" {
+			if i == 5 {
+				return errors.New(fmt.Sprintf("Service %s in cluster %s is draining for the past minute. Aborting startup.", deployment.Name, deployment.Cluster))
+			}
+			time.Sleep(time.Second * 10)
+		} else {
+			break
+		}
 	}
 
 	_, err = ecsService.CreateService(&ecs.CreateServiceInput{
