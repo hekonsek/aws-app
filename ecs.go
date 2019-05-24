@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/giantswarm/retry-go"
 	"github.com/go-errors/errors"
 	awsom_session "github.com/hekonsek/awsom-session"
 	"strings"
@@ -167,20 +168,18 @@ func DeleteEcsCluster(clusterName string) error {
 		}
 	}
 
-	for i := 0; i < 6; i++ {
-		_, err = ecsService.DeleteCluster(&ecs.DeleteClusterInput{
-			Cluster: aws.String(clusterName),
-		})
-		if err != nil {
-			if strings.Contains(err.Error(), "The Cluster cannot be deleted while Tasks are active.") {
-				continue
-			} else {
-				return err
-			}
-		} else {
-			break
-		}
-	}
+	err = retry.Do(
+		func() error {
+			_, err = ecsService.DeleteCluster(&ecs.DeleteClusterInput{
+				Cluster: aws.String(clusterName),
+			})
+			return err
+		},
+		retry.RetryChecker(func(err error) bool {
+			return strings.Contains(err.Error(), "The Cluster cannot be deleted while Tasks are active.")
+		}),
+		retry.Timeout(time.Minute),
+		retry.Sleep(5*time.Second))
 
 	return nil
 }
