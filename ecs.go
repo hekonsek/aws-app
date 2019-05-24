@@ -180,6 +180,9 @@ func DeleteEcsCluster(clusterName string) error {
 		}),
 		retry.Timeout(time.Minute),
 		retry.Sleep(5*time.Second))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
