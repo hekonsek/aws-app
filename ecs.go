@@ -179,7 +179,8 @@ func DeleteEcsCluster(clusterName string) error {
 			return strings.Contains(err.Error(), "The Cluster cannot be deleted while Tasks are active.")
 		}),
 		retry.Timeout(time.Minute),
-		retry.Sleep(5*time.Second))
+		retry.Sleep(5*time.Second),
+		retry.MaxTries(1000))
 	if err != nil {
 		return err
 	}
@@ -250,7 +251,44 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 			},
 		},
 		DesiredCount: aws.Int64(1),
+		//LoadBalancers: []*ecs.LoadBalancer{
+		//	{
+		//		LoadBalancerName: aws.String(deployment.Cluster),
+		//		ContainerPort: aws.Int64(9090),
+		//		ContainerName: aws.String(deployment.Name),
+		//		TargetGroupArn: aws.String(targetGroup),
+		//	},
+		//},
 	})
+	if err != nil {
+		return err
+	}
+
+	var ips []string
+	err = retry.Do(
+		func() error {
+			ips, err = EcsApplicationAddressesByName(deployment.Cluster, deployment.Name)
+			if len(ips) < 1 {
+				return errors.New("No tasks found.")
+			}
+			return err
+		},
+		retry.RetryChecker(func(err error) bool {
+			return true
+		}),
+		retry.Timeout(time.Minute),
+		retry.Sleep(5*time.Second),
+		retry.MaxTries(1000))
+	if err != nil {
+		return err
+	}
+
+	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
+	if err != nil {
+		return err
+	}
+
+	err = AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
 	if err != nil {
 		return err
 	}
@@ -281,4 +319,37 @@ func DeleteEcsApplication(runtime string, name string) error {
 	}
 
 	return nil
+}
+
+func EcsApplicationAddressesByName(cluster string, name string) ([]string, error) {
+	ecsService, err := EcsService()
+	if err != nil {
+		return nil, err
+	}
+
+	tasksArns, err := ecsService.ListTasks(&ecs.ListTasksInput{
+		Cluster:     aws.String(cluster),
+		ServiceName: aws.String(name),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tasks, err := ecsService.DescribeTasks(&ecs.DescribeTasksInput{
+		Cluster: aws.String(cluster),
+		Tasks:   tasksArns.TaskArns,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var addresses []string
+	for _, task := range tasks.Tasks {
+		if *task.Containers[0].LastStatus != "RUNNING" {
+			continue
+		}
+		addresses = append(addresses, *task.Containers[0].NetworkInterfaces[0].PrivateIpv4Address)
+	}
+
+	return addresses, nil
 }

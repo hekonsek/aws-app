@@ -11,7 +11,15 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 
 	// Given
 	defer func() {
+		err := awsom.DeleteEcsApplication("monitoring", "prometheus")
+		assert.NoError(t, err)
+	}()
+	defer func() {
 		err := awsom.DeleteEcsCluster("monitoring")
+		assert.NoError(t, err)
+	}()
+	defer func() {
+		err := awsom.DeleteLoadBalancer("monitoring")
 		assert.NoError(t, err)
 	}()
 	defer func() {

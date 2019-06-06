@@ -1,7 +1,7 @@
 package awsom
 
 import (
-	"github.com/hekonsek/random-strings"
+	randomstrings "github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -23,7 +23,7 @@ func TestCreateLoadBalancer(t *testing.T) {
 	}()
 
 	// When
-	err = (&ApplicationLoadBalancer{Name: name}).CreateOrUpdate()
+	err = (&ApplicationLoadBalancerBuilder{Name: name}).Create()
 
 	// Then
 	assert.NoError(t, err)

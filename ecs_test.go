@@ -53,12 +53,6 @@ func TestCreateEcsApplication(t *testing.T) {
 	// Given
 	name := randomstrings.ForHumanWithHash()
 	defer func() {
-		err := awsom.DeleteVpc(name)
-		assert.NoError(t, err)
-	}()
-	err := awsom.NewVpcBuilder(name).Create()
-	assert.NoError(t, err)
-	defer func() {
 		err := awsom.DeleteEcsTaskDefinition(name)
 		assert.NoError(t, err)
 	}()
@@ -66,6 +60,18 @@ func TestCreateEcsApplication(t *testing.T) {
 		err := awsom.DeleteEcsCluster(name)
 		assert.NoError(t, err)
 	}()
+	defer func() {
+		err := awsom.DeleteLoadBalancer(name)
+		assert.NoError(t, err)
+	}()
+	defer func() {
+		err := awsom.DeleteVpc(name)
+		assert.NoError(t, err)
+	}()
+	err := awsom.NewVpcBuilder(name).Create()
+	assert.NoError(t, err)
+	err = (&awsom.ApplicationLoadBalancerBuilder{Name: name}).Create()
+	assert.NoError(t, err)
 	err = awsom.NewEcsClusterBuilder(name).Create()
 	assert.NoError(t, err)
 
