@@ -60,13 +60,9 @@ func TestCreateEcsApplication(t *testing.T) {
 	defer func() {
 		err := awsom.DeleteEcsCluster(name)
 		assert.NoError(t, err)
-	}()
-	defer func() {
-		err := aws.DeleteElasticLoadBalancer(name)
+		err = aws.DeleteElasticLoadBalancer(name)
 		assert.NoError(t, err)
-	}()
-	defer func() {
-		err := aws.DeleteVpc(name)
+		err = aws.DeleteVpc(name)
 		assert.NoError(t, err)
 	}()
 	err := aws.NewVpcBuilder(name).Create()
