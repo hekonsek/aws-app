@@ -1,5 +1,5 @@
 PACKAGES := github.com/hekonsek/awsom github.com/hekonsek/awsom/main
-VERSION := 1.0.0
+VERSION := 1.1.0
 
 all: format rice silent-test build
 
