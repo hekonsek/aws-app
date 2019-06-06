@@ -1,6 +1,6 @@
 # Awsom - AWS applications made easy
 
-[![Version](https://img.shields.io/badge/Awsom-0.2.0-blue.svg)](https://github.com/hekonsek/awsom/releases)
+[![Version](https://img.shields.io/badge/Awsom-0.3.0-blue.svg)](https://github.com/hekonsek/awsom/releases)
 
 Awsom is a toolkit providing opinionated setup of infrastructure, applications and CI/CD based on AWS. This project
 is intended to cover majority of common AWS deployments by following convention-over-configuration approach. Think about
