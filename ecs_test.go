@@ -2,6 +2,7 @@ package awsom_test
 
 import (
 	"github.com/hekonsek/awsom"
+	"github.com/hekonsek/awsom/aws"
 	"github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -30,10 +31,10 @@ func TestCreateCluster(t *testing.T) {
 	// Given
 	name := randomstrings.ForHumanWithHash()
 	defer func() {
-		err := awsom.DeleteVpc(name)
+		err := aws.DeleteVpc(name)
 		assert.NoError(t, err)
 	}()
-	err := awsom.NewVpcBuilder(name).Create()
+	err := aws.NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
 	defer func() {
 		err := awsom.DeleteEcsCluster(name)
@@ -61,16 +62,16 @@ func TestCreateEcsApplication(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteLoadBalancer(name)
+		err := aws.DeleteLoadBalancer(name)
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteVpc(name)
+		err := aws.DeleteVpc(name)
 		assert.NoError(t, err)
 	}()
-	err := awsom.NewVpcBuilder(name).Create()
+	err := aws.NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
-	err = (&awsom.ApplicationLoadBalancerBuilder{Name: name}).Create()
+	err = (&aws.ApplicationLoadBalancerBuilder{Name: name}).Create()
 	assert.NoError(t, err)
 	err = awsom.NewEcsClusterBuilder(name).Create()
 	assert.NoError(t, err)

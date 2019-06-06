@@ -24,7 +24,7 @@ var envCreateCommand = &cobra.Command{
 			return
 		}
 
-		osexit.ExitOnError(awsom.NewVpcBuilder(envCreateName).Create())
+		osexit.ExitOnError(awsom.NewEnvBuilder(envCreateName).Create())
 
 		fmt.Println("Environment " + color.GreenString(envCreateName) + " created.")
 	},

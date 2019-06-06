@@ -1,4 +1,4 @@
-package awsom
+package aws
 
 import (
 	"fmt"
@@ -308,6 +308,14 @@ func DeleteVpc(name string) error {
 	vpcId, err := VpcId(name)
 	if err != nil {
 		return err
+	}
+
+	loadBalancerArn, err := LoadBalancerArnByVpcId(vpcId)
+	if err != nil {
+		return err
+	}
+	if loadBalancerArn != "" {
+		return errors.New(fmt.Sprintf("Load balancer with ARN %s is attached to VPC. Please delete it before deleting VPC.", loadBalancerArn))
 	}
 
 	gatewayResults, err := ec2Service.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{

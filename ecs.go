@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/retry-go"
 	"github.com/go-errors/errors"
 	awsom_session "github.com/hekonsek/awsom-session"
+	aws2 "github.com/hekonsek/awsom/aws"
 	"strings"
 	"time"
 )
@@ -215,7 +216,7 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	subnets, err := VpcSubnetsByName(deployment.Cluster)
+	subnets, err := aws2.VpcSubnetsByName(deployment.Cluster)
 	if err != nil {
 		return err
 	}
@@ -283,12 +284,12 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
+	_, err = aws2.NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
 	if err != nil {
 		return err
 	}
 
-	err = AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
+	err = aws2.AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
 	if err != nil {
 		return err
 	}

@@ -1,5 +1,7 @@
 package awsom
 
+import "github.com/hekonsek/awsom/aws"
+
 type prometheusBuilder struct {
 	Name string
 	Vpc  string
@@ -13,12 +15,12 @@ func NewPrometheusBuilder() *prometheusBuilder {
 }
 
 func (prometheus *prometheusBuilder) Create() error {
-	vpcExists, err := VpcExistsByName(prometheus.Vpc)
+	vpcExists, err := aws.VpcExistsByName(prometheus.Vpc)
 	if err != nil {
 		return err
 	}
 	if !vpcExists {
-		err = NewVpcBuilder(prometheus.Vpc).Create()
+		err = aws.NewVpcBuilder(prometheus.Vpc).Create()
 		if err != nil {
 			return err
 		}

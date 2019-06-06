@@ -2,6 +2,7 @@ package awsom_test
 
 import (
 	"github.com/hekonsek/awsom"
+	"github.com/hekonsek/awsom/aws"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
@@ -19,11 +20,11 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteLoadBalancer("monitoring")
+		err := aws.DeleteLoadBalancer("monitoring")
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteVpc("monitoring")
+		err := aws.DeleteVpc("monitoring")
 		assert.NoError(t, err)
 	}()
 
@@ -32,7 +33,7 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Then
-	vpcExists, err := awsom.VpcExistsByName("monitoring")
+	vpcExists, err := aws.VpcExistsByName("monitoring")
 	assert.True(t, vpcExists)
 	clusterExists, err := awsom.EcsClusterExistsByName("monitoring")
 	assert.True(t, clusterExists)

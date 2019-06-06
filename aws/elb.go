@@ -1,4 +1,4 @@
-package awsom
+package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
@@ -68,6 +68,27 @@ func DeleteLoadBalancer(name string) error {
 	})
 
 	return err
+}
+
+func LoadBalancerArnByVpcId(vpcId string) (string, error) {
+	sess, err := awsom_session.NewSession()
+	if err != nil {
+		return "", err
+	}
+	elbService := elbv2.New(sess)
+
+	loadBalancerInfo, err := elbService.DescribeLoadBalancers(&elbv2.DescribeLoadBalancersInput{})
+	if err != nil {
+		return "", err
+	}
+
+	for _, loadBalancer := range loadBalancerInfo.LoadBalancers {
+		if *loadBalancer.VpcId == vpcId {
+			return *loadBalancer.LoadBalancerArn, nil
+		}
+	}
+
+	return "", nil
 }
 
 func LoadBalancerArnByName(name string) (string, error) {

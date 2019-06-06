@@ -8,10 +8,10 @@ import (
 )
 
 func init() {
-	envCommand.AddCommand(envListCommand)
+	awsVpcCommand.AddCommand(awsVpcListCommand)
 }
 
-var envListCommand = &cobra.Command{
+var awsVpcListCommand = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
 		vpcs, err := aws.ListVpc()

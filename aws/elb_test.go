@@ -1,4 +1,4 @@
-package awsom
+package aws
 
 import (
 	randomstrings "github.com/hekonsek/random-strings"
@@ -16,8 +16,6 @@ func TestCreateLoadBalancer(t *testing.T) {
 	defer func() {
 		err := DeleteLoadBalancer(name)
 		assert.NoError(t, err)
-	}()
-	defer func() {
 		err = DeleteVpc(name)
 		assert.NoError(t, err)
 	}()

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/hekonsek/awsom"
+	"github.com/hekonsek/awsom/aws"
 	"github.com/hekonsek/osexit"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +24,7 @@ var envDeleteCommand = &cobra.Command{
 			return
 		}
 
-		osexit.ExitOnError(awsom.DeleteVpc(envDeleteName))
+		osexit.ExitOnError(aws.DeleteVpc(envDeleteName))
 
 		fmt.Println("Environment " + color.GreenString(envDeleteName) + " deleted.")
 	},
