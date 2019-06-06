@@ -6,11 +6,17 @@ import (
 	awsom_session "github.com/hekonsek/awsom-session"
 )
 
-type ApplicationLoadBalancerBuilder struct {
+type elasticLoadBalancerBuilder struct {
 	Name string
 }
 
-func (loadBalancer *ApplicationLoadBalancerBuilder) Create() error {
+func NewElasticLoadBalancer(name string) *elasticLoadBalancerBuilder {
+	return &elasticLoadBalancerBuilder{
+		Name: name,
+	}
+}
+
+func (loadBalancer *elasticLoadBalancerBuilder) Create() error {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
@@ -52,7 +58,7 @@ func (loadBalancer *ApplicationLoadBalancerBuilder) Create() error {
 	return nil
 }
 
-func DeleteLoadBalancer(name string) error {
+func DeleteElasticLoadBalancer(name string) error {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err

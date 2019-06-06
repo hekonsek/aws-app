@@ -20,7 +20,7 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := aws.DeleteLoadBalancer("monitoring")
+		err := aws.DeleteElasticLoadBalancer("monitoring")
 		assert.NoError(t, err)
 	}()
 	defer func() {

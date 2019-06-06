@@ -1,6 +1,7 @@
-package aws
+package aws_test
 
 import (
+	"github.com/hekonsek/awsom/aws"
 	randomstrings "github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -11,17 +12,17 @@ func TestCreateLoadBalancer(t *testing.T) {
 
 	// Given
 	name := randomstrings.ForHumanWithHash()
-	err := NewVpcBuilder(name).Create()
+	err := aws.NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
 	defer func() {
-		err := DeleteLoadBalancer(name)
+		err := aws.DeleteElasticLoadBalancer(name)
 		assert.NoError(t, err)
-		err = DeleteVpc(name)
+		err = aws.DeleteVpc(name)
 		assert.NoError(t, err)
 	}()
 
 	// When
-	err = (&ApplicationLoadBalancerBuilder{Name: name}).Create()
+	err = aws.NewElasticLoadBalancer(name).Create()
 
 	// Then
 	assert.NoError(t, err)

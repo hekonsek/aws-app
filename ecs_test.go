@@ -62,7 +62,7 @@ func TestCreateEcsApplication(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := aws.DeleteLoadBalancer(name)
+		err := aws.DeleteElasticLoadBalancer(name)
 		assert.NoError(t, err)
 	}()
 	defer func() {
@@ -71,7 +71,7 @@ func TestCreateEcsApplication(t *testing.T) {
 	}()
 	err := aws.NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
-	err = (&aws.ApplicationLoadBalancerBuilder{Name: name}).Create()
+	err = aws.NewElasticLoadBalancer(name).Create()
 	assert.NoError(t, err)
 	err = awsom.NewEcsClusterBuilder(name).Create()
 	assert.NoError(t, err)
