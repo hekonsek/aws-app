@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/hekonsek/awsom"
+	"github.com/hekonsek/awsom/aws"
 	"github.com/hekonsek/osexit"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +24,7 @@ var runtimeCreateEcsCommand = &cobra.Command{
 			return
 		}
 
-		osexit.ExitOnError(awsom.NewEcsClusterBuilder(runtimeCreateEcsName).Create())
+		osexit.ExitOnError(aws.NewEcsClusterBuilder(runtimeCreateEcsName).Create())
 		fmt.Println("Runtime " + color.GreenString(runtimeCreateEcsName) + " created.")
 	},
 }

@@ -12,11 +12,11 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 
 	// Given
 	defer func() {
-		err := awsom.DeleteEcsApplication("monitoring", "prometheus")
+		err := aws.DeleteEcsApplication("monitoring", "prometheus")
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteEcsCluster("monitoring")
+		err := aws.DeleteEcsCluster("monitoring")
 		assert.NoError(t, err)
 	}()
 	defer func() {
@@ -35,6 +35,6 @@ func TestMonitoringEnvironmentCreated(t *testing.T) {
 	// Then
 	vpcExists, err := aws.VpcExistsByName("monitoring")
 	assert.True(t, vpcExists)
-	clusterExists, err := awsom.EcsClusterExistsByName("monitoring")
+	clusterExists, err := aws.EcsClusterExistsByName("monitoring")
 	assert.True(t, clusterExists)
 }

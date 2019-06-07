@@ -26,15 +26,15 @@ func (prometheus *prometheusBuilder) Create() error {
 		}
 	}
 
-	clusterExists, err := EcsClusterExistsByName(prometheus.Vpc)
+	clusterExists, err := aws.EcsClusterExistsByName(prometheus.Vpc)
 	if !clusterExists {
-		err = NewEcsClusterBuilder(prometheus.Vpc).Create()
+		err = aws.NewEcsClusterBuilder(prometheus.Vpc).Create()
 		if err != nil {
 			return err
 		}
 	}
 
-	err = NewEcsDeploymentBuilder(prometheus.Name, prometheus.Vpc, "prom/prometheus").Create()
+	err = aws.NewEcsDeploymentBuilder(prometheus.Name, prometheus.Vpc, "prom/prometheus").Create()
 	if err != nil {
 		return err
 	}

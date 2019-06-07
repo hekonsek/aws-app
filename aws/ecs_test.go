@@ -1,7 +1,6 @@
-package awsom_test
+package aws_test
 
 import (
-	"github.com/hekonsek/awsom"
 	"github.com/hekonsek/awsom/aws"
 	"github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
@@ -14,12 +13,12 @@ func TestCreateTaskDefinition(t *testing.T) {
 	// Given
 	name := randomstrings.ForHumanWithHash()
 	defer func() {
-		err := awsom.DeleteEcsTaskDefinition(name)
+		err := aws.DeleteEcsTaskDefinition(name)
 		assert.NoError(t, err)
 	}()
 
 	// When
-	err := awsom.NewEcsTaskDefinitionBuilder(name, "hekonsek/http-echo").Create()
+	err := aws.NewEcsTaskDefinitionBuilder(name, "hekonsek/http-echo").Create()
 
 	// Then
 	assert.NoError(t, err)
@@ -37,12 +36,12 @@ func TestCreateCluster(t *testing.T) {
 	err := aws.NewVpcBuilder(name).Create()
 	assert.NoError(t, err)
 	defer func() {
-		err := awsom.DeleteEcsCluster(name)
+		err := aws.DeleteEcsCluster(name)
 		assert.NoError(t, err)
 	}()
 
 	// When
-	err = awsom.NewEcsClusterBuilder(name).Create()
+	err = aws.NewEcsClusterBuilder(name).Create()
 
 	// Then
 	assert.NoError(t, err)
@@ -54,11 +53,11 @@ func TestCreateEcsApplication(t *testing.T) {
 	// Given
 	name := randomstrings.ForHumanWithHash()
 	defer func() {
-		err := awsom.DeleteEcsTaskDefinition(name)
+		err := aws.DeleteEcsTaskDefinition(name)
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := awsom.DeleteEcsCluster(name)
+		err := aws.DeleteEcsCluster(name)
 		assert.NoError(t, err)
 		err = aws.DeleteElasticLoadBalancer(name)
 		assert.NoError(t, err)
@@ -69,11 +68,11 @@ func TestCreateEcsApplication(t *testing.T) {
 	assert.NoError(t, err)
 	err = aws.NewElasticLoadBalancer(name).Create()
 	assert.NoError(t, err)
-	err = awsom.NewEcsClusterBuilder(name).Create()
+	err = aws.NewEcsClusterBuilder(name).Create()
 	assert.NoError(t, err)
 
 	// When
-	err = awsom.NewEcsDeploymentBuilder(name, name, "hekonsek/http-echo").Create()
+	err = aws.NewEcsDeploymentBuilder(name, name, "hekonsek/http-echo").Create()
 
 	// Then
 	assert.NoError(t, err)

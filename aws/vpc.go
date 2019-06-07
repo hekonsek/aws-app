@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/retry-go"
 	"github.com/go-errors/errors"
 	"github.com/hekonsek/awsom-session"
 	"strings"
+	"time"
 )
 
 // Create
@@ -318,6 +320,14 @@ func DeleteVpc(name string) error {
 		return errors.New(fmt.Sprintf("Load balancer with ARN %s is attached to VPC. Please delete it before deleting VPC.", loadBalancerArn))
 	}
 
+	clusterArn, err := EcsClusterArnByVpcId(vpcId)
+	if err != nil {
+		return err
+	}
+	if clusterArn != "" {
+		return errors.New(fmt.Sprintf("ECS cluster with ARN %s is attached to VPC. Please delete it before deleting VPC.", clusterArn))
+	}
+
 	gatewayResults, err := ec2Service.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{
 		Filters: []*ec2.Filter{
 			{
@@ -331,10 +341,20 @@ func DeleteVpc(name string) error {
 	}
 
 	if len(gatewayResults.InternetGateways) == 1 {
-		_, err = ec2Service.DetachInternetGateway(&ec2.DetachInternetGatewayInput{
-			VpcId:             aws.String(vpcId),
-			InternetGatewayId: gatewayResults.InternetGateways[0].InternetGatewayId,
-		})
+		err = retry.Do(
+			func() error {
+				_, err = ec2Service.DetachInternetGateway(&ec2.DetachInternetGatewayInput{
+					VpcId:             aws.String(vpcId),
+					InternetGatewayId: gatewayResults.InternetGateways[0].InternetGatewayId,
+				})
+				return err
+			},
+			retry.RetryChecker(func(err error) bool {
+				return strings.Contains(err.Error(), "Please unmap those public address(es) before detaching the gateway.")
+			}),
+			retry.Timeout(time.Minute),
+			retry.Sleep(5*time.Second),
+			retry.MaxTries(1000))
 		if err != nil {
 			return err
 		}

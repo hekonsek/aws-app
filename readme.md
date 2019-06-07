@@ -9,7 +9,7 @@ it like "Rails but for AWS".
 ## Usage
 
 ```
-docker run --net=host -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -it hekonsek/awsom:1.0.0
+docker run --net=host -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -it hekonsek/awsom:0.3.0
 ```
 
 ## License

@@ -1,13 +1,13 @@
-package awsom
+package aws
 
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/giantswarm/retry-go"
 	"github.com/go-errors/errors"
 	awsom_session "github.com/hekonsek/awsom-session"
-	aws2 "github.com/hekonsek/awsom/aws"
 	"strings"
 	"time"
 )
@@ -127,16 +127,78 @@ func (cluster *ecsClusterBuilder) Create() error {
 	return nil
 }
 
-func EcsClusterExistsByName(name string) (bool, error) {
+func EcsClusterArnByVpcId(vpcId string) (string, error) {
 	ecsService, err := EcsService()
 	if err != nil {
-		return false, err
+		return "", err
+	}
+
+	clusters, err := ecsService.ListClusters(&ecs.ListClustersInput{})
+	if err != nil {
+		return "", err
+	}
+
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return "", err
+	}
+
+	for _, cluster := range clusters.ClusterArns {
+		servicesArns, err := ecsService.ListServices(&ecs.ListServicesInput{
+			Cluster: cluster,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		if len(servicesArns.ServiceArns) > 0 {
+			services, err := ecsService.DescribeServices(&ecs.DescribeServicesInput{
+				Cluster:  cluster,
+				Services: servicesArns.ServiceArns,
+			})
+			if err != nil {
+				return "", err
+			}
+			for _, service := range services.Services {
+				subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
+					SubnetIds: service.NetworkConfiguration.AwsvpcConfiguration.Subnets,
+				})
+				if err != nil {
+					return "", err
+				}
+				for _, subnet := range subnets.Subnets {
+					if *subnet.VpcId == vpcId {
+						return *service.ClusterArn, err
+					}
+				}
+			}
+		}
+	}
+
+	return "", nil
+}
+
+func EcsClusterArnByName(name string) (string, error) {
+	ecsService, err := EcsService()
+	if err != nil {
+		return "", err
 	}
 
 	clusters, err := ecsService.DescribeClusters(&ecs.DescribeClustersInput{
 		Clusters: aws.StringSlice([]string{name}),
 	})
-	return len(clusters.Clusters) > 0 && *clusters.Clusters[0].Status != "INACTIVE", nil
+	if len(clusters.Clusters) > 0 && *clusters.Clusters[0].Status != "INACTIVE" {
+		return *clusters.Clusters[0].ClusterArn, nil
+	}
+	return "", nil
+}
+
+func EcsClusterExistsByName(name string) (bool, error) {
+	clusterArn, err := EcsClusterArnByName(name)
+	if err != nil {
+		return false, err
+	}
+	return clusterArn != "", nil
 }
 
 func DeleteEcsCluster(clusterName string) error {
@@ -216,7 +278,7 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	subnets, err := aws2.VpcSubnetsByName(deployment.Cluster)
+	subnets, err := VpcSubnetsByName(deployment.Cluster)
 	if err != nil {
 		return err
 	}
@@ -284,12 +346,12 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	_, err = aws2.NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
+	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
 	if err != nil {
 		return err
 	}
 
-	err = aws2.AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
+	err = AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
 	if err != nil {
 		return err
 	}
