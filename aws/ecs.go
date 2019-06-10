@@ -241,7 +241,7 @@ func DeleteEcsCluster(clusterName string) error {
 		retry.RetryChecker(func(err error) bool {
 			return strings.Contains(err.Error(), "The Cluster cannot be deleted while Tasks are active.")
 		}),
-		retry.Timeout(time.Minute),
+		retry.Timeout(2 * time.Minute),
 		retry.Sleep(5*time.Second),
 		retry.MaxTries(1000))
 	if err != nil {

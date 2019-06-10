@@ -408,9 +408,20 @@ func DeleteVpc(name string) error {
 		return err
 	}
 	for _, subnet := range subnets {
-		_, err = ec2Service.DeleteSubnet(&ec2.DeleteSubnetInput{
-			SubnetId: aws.String(subnet),
-		})
+		// Let's give ENI some time to be released
+		err = retry.Do(
+			func() error {
+				_, err = ec2Service.DeleteSubnet(&ec2.DeleteSubnetInput{
+					SubnetId: aws.String(subnet),
+				})
+				return err
+			},
+			retry.RetryChecker(func(err error) bool {
+				return strings.Contains(err.Error(), "has dependencies and cannot be deleted.")
+			}),
+			retry.Timeout(time.Minute),
+			retry.Sleep(5*time.Second),
+			retry.MaxTries(1000))
 		if err != nil {
 			return err
 		}
