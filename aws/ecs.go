@@ -314,14 +314,6 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 			},
 		},
 		DesiredCount: aws.Int64(1),
-		//LoadBalancers: []*ecs.LoadBalancer{
-		//	{
-		//		LoadBalancerName: aws.String(deployment.Cluster),
-		//		ContainerPort: aws.Int64(9090),
-		//		ContainerName: aws.String(deployment.Name),
-		//		TargetGroupArn: aws.String(targetGroup),
-		//	},
-		//},
 	})
 	if err != nil {
 		return err
@@ -346,7 +338,7 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster).WithIPs(ips).Create()
+	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster, deployment.Name).WithIPs(ips).Create()
 	if err != nil {
 		return err
 	}

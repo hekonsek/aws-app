@@ -26,6 +26,11 @@ func (prometheus *prometheusBuilder) Create() error {
 		}
 	}
 
+	err = aws.NewElasticLoadBalancer(prometheus.Vpc).Create()
+	if err != nil {
+		return err
+	}
+
 	clusterExists, err := aws.EcsClusterExistsByName(prometheus.Vpc)
 	if !clusterExists {
 		err = aws.NewEcsClusterBuilder(prometheus.Vpc).Create()
@@ -44,5 +49,10 @@ func (prometheus *prometheusBuilder) Create() error {
 
 func (prometheus *prometheusBuilder) WithName(name string) *prometheusBuilder {
 	prometheus.Name = name
+	return prometheus
+}
+
+func (prometheus *prometheusBuilder) WithVPc(vpc string) *prometheusBuilder {
+	prometheus.Vpc = vpc
 	return prometheus
 }

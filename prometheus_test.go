@@ -3,38 +3,40 @@ package awsom_test
 import (
 	"github.com/hekonsek/awsom"
 	"github.com/hekonsek/awsom/aws"
+	randomstrings "github.com/hekonsek/random-strings"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
-import "github.com/stretchr/testify/assert"
 
 func TestMonitoringEnvironmentCreated(t *testing.T) {
 	t.Parallel()
 
+	vpcName := randomstrings.ForHumanWithDashAndHash()
 	// Given
 	defer func() {
-		err := aws.DeleteEcsApplication("monitoring", "prometheus")
+		err := aws.DeleteVpc(vpcName)
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := aws.DeleteEcsCluster("monitoring")
+		err := aws.DeleteElasticLoadBalancer(vpcName)
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := aws.DeleteElasticLoadBalancer("monitoring")
+		err := aws.DeleteEcsCluster(vpcName)
 		assert.NoError(t, err)
 	}()
 	defer func() {
-		err := aws.DeleteVpc("monitoring")
+		err := aws.DeleteEcsApplication(vpcName, "prometheus")
 		assert.NoError(t, err)
 	}()
 
 	// When
-	err := awsom.NewPrometheusBuilder().Create()
+	err := awsom.NewPrometheusBuilder().WithVPc(vpcName).Create()
 	assert.NoError(t, err)
 
 	// Then
-	vpcExists, err := aws.VpcExistsByName("monitoring")
+	vpcExists, err := aws.VpcExistsByName(vpcName)
 	assert.True(t, vpcExists)
-	clusterExists, err := aws.EcsClusterExistsByName("monitoring")
+	clusterExists, err := aws.EcsClusterExistsByName(vpcName)
 	assert.True(t, clusterExists)
 }

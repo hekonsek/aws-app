@@ -137,12 +137,14 @@ func LoadBalancerListenerArnByName(name string) (string, error) {
 }
 
 type loadBalancerTargetGroupBuilderBuilder struct {
+	Vpc  string
 	Name string
 	IPs  []string
 }
 
-func NewLoadBalancerTargetGroupBuilderBuilder(name string) *loadBalancerTargetGroupBuilderBuilder {
+func NewLoadBalancerTargetGroupBuilderBuilder(vpc string, name string) *loadBalancerTargetGroupBuilderBuilder {
 	return &loadBalancerTargetGroupBuilderBuilder{
+		Vpc:  vpc,
 		Name: name,
 	}
 }
@@ -159,7 +161,7 @@ func (targetGroup *loadBalancerTargetGroupBuilderBuilder) Create() (string, erro
 	}
 	elbService := elbv2.New(sess)
 
-	vpcId, err := VpcId(targetGroup.Name)
+	vpcId, err := VpcId(targetGroup.Vpc)
 	if err != nil {
 		return "", err
 	}
