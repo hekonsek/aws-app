@@ -338,12 +338,13 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster, deployment.Name).WithIPs(ips).Create()
+	targetGroupName := deployment.Cluster + "-" + deployment.Name
+	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster, targetGroupName).WithIPs(ips).Create()
 	if err != nil {
 		return err
 	}
 
-	err = AssignLoadBalancerTargetGroup(deployment.Cluster, deployment.Name, "/"+deployment.Name)
+	err = AssignLoadBalancerTargetGroup(deployment.Cluster, targetGroupName, "/"+deployment.Name)
 	if err != nil {
 		return err
 	}
