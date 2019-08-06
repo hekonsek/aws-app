@@ -183,11 +183,17 @@ func ListVpc() ([]string, error) {
 	}
 	var vpcs []string
 	for _, vpc := range vpcsOutput.Vpcs {
+		name := ""
 		for _, tag := range vpc.Tags {
 			if *tag.Key == "Name" {
-				vpcs = append(vpcs, *tag.Value)
+				name = *tag.Value
+				break
 			}
 		}
+		if name == "" {
+			name = "id:" + *vpc.VpcId
+		}
+		vpcs = append(vpcs, name)
 	}
 	return vpcs, nil
 }

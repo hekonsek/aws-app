@@ -5,6 +5,7 @@ import (
 	"github.com/hekonsek/awsom/aws"
 	"github.com/hekonsek/osexit"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 func init() {
@@ -18,7 +19,9 @@ var envListCommand = &cobra.Command{
 		osexit.ExitOnError(err)
 
 		for _, vpc := range vpcs {
-			fmt.Println(vpc)
+			if !strings.HasPrefix(vpc, "id:") {
+				fmt.Println(vpc)
+			}
 		}
 	},
 }
