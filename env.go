@@ -1,17 +1,53 @@
 package awsom
 
-import "github.com/hekonsek/awsom/aws"
+import (
+	"github.com/hekonsek/awsom/aws"
+	"strings"
+)
 
 type envBuilder struct {
-	Name string
+	Name   string
+	Domain string
 }
 
-func NewEnvBuilder(name string) *envBuilder {
+func NewEnvBuilder(name string, domain string) *envBuilder {
 	return &envBuilder{
-		Name: name,
+		Name:   name,
+		Domain: domain,
 	}
 }
 
 func (env *envBuilder) Create() error {
+	domainSegments := strings.Split(env.Domain, ".")
+	rootDomainSegments := domainSegments[len(domainSegments)-2:]
+	rootDomain := strings.Join(rootDomainSegments, ".")
+
+	err := aws.NewHostedZoneBuilder(rootDomain).Create()
+	if err != nil {
+		return err
+	}
+	err = aws.TagHostedZone(rootDomain, "env:"+env.Name, env.Domain)
+	if err != nil {
+		return err
+	}
+
 	return aws.NewVpcBuilder(env.Name).Create()
+}
+
+func DeleteEnv(name string) error {
+	domain, _, err := aws.FirstHostedZoneTag("env:" + name)
+	if err != nil {
+		return err
+	}
+	err = aws.DeleteHostedZoneTag(domain, "env:"+name)
+	if err != nil {
+		return err
+	}
+
+	err = aws.DeleteVpc(name)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
