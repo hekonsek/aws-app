@@ -292,11 +292,15 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		if err != nil {
 			return err
 		}
-		if len(serviceState.Services) > 0 && *serviceState.Services[0].Status == "DRAINING" {
-			if i == 5 {
-				return errors.New(fmt.Sprintf("Service %s in cluster %s is draining for the past minute. Aborting startup.", deployment.Name, deployment.Cluster))
+		if len(serviceState.Services) > 0 {
+			if *serviceState.Services[0].Status == "DRAINING" {
+				if i == 5 {
+					return errors.New(fmt.Sprintf("Service %s in cluster %s is draining for the past minute. Aborting startup.", deployment.Name, deployment.Cluster))
+				}
+				time.Sleep(time.Second * 10)
+			} else {
+				return errors.New(fmt.Sprintf("service %s exists in cluster %s", deployment.Name, deployment.Cluster))
 			}
-			time.Sleep(time.Second * 10)
 		} else {
 			break
 		}
