@@ -26,6 +26,12 @@ func ExitOnCliError(err error) {
 	}
 }
 
+func Warn(err error) {
+	if err != nil {
+		fmt.Printf("Warning! Error occured: %s", err.Error())
+	}
+}
+
 func CliCapture(handler func() error) (string, error) {
 	readStdOut := os.Stdout
 	pipeIn, pipeOut, err := os.Pipe()

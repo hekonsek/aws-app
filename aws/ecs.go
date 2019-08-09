@@ -339,6 +339,9 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 	}
 
 	targetGroupName := deployment.Cluster + "-" + deployment.Name
+	if len(targetGroupName) > 32 {
+		targetGroupName = targetGroupName[0:32]
+	}
 	_, err = NewLoadBalancerTargetGroupBuilderBuilder(deployment.Cluster, targetGroupName).WithIPs(ips).Create()
 	if err != nil {
 		return err
