@@ -2,6 +2,7 @@ package awsom
 
 import (
 	"github.com/hekonsek/awsom/aws"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -39,9 +40,14 @@ func DeleteEnv(name string) error {
 	if err != nil {
 		return err
 	}
-	err = aws.DeleteHostedZoneTag(domain, "env:"+name)
-	if err != nil {
-		return err
+
+	if domain != "" {
+		err = aws.DeleteHostedZoneTag(domain, "env:"+name)
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Debugf("Domain is not associated with environment %s. Skipping deletion.", name)
 	}
 
 	err = aws.DeleteVpc(name)
