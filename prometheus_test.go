@@ -11,7 +11,7 @@ import (
 func TestMonitoringEnvironmentCreated(t *testing.T) {
 	t.Parallel()
 
-	vpcName := randomstrings.ForHumanWithHash()[5:]
+	vpcName := randomstrings.ForHumanWithHash()
 	// Given
 	defer func() {
 		err := aws.DeleteVpc(vpcName)
