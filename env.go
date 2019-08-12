@@ -23,9 +23,15 @@ func (env *envBuilder) Create() error {
 	rootDomainSegments := domainSegments[len(domainSegments)-2:]
 	rootDomain := strings.Join(rootDomainSegments, ".")
 
-	err := aws.NewHostedZoneBuilder(rootDomain).Create()
+	zoneExists, err := aws.HostedZoneExists(rootDomain)
 	if err != nil {
 		return err
+	}
+	if !zoneExists {
+		err := aws.NewHostedZoneBuilder(rootDomain).Create()
+		if err != nil {
+			return err
+		}
 	}
 	err = aws.TagHostedZone(rootDomain, "env:"+env.Name, env.Domain)
 	if err != nil {
@@ -48,6 +54,39 @@ func DeleteEnv(name string) error {
 		}
 	} else {
 		log.Debugf("Domain is not associated with environment %s. Skipping deletion.", name)
+	}
+
+	ecsCluster, err := aws.EcsClusterArnByName(name)
+	if err != nil {
+		return err
+	}
+	if ecsCluster != "" {
+		err = aws.DeleteEcsCluster(ecsCluster)
+		if err != nil {
+			return err
+		}
+	}
+
+	loadBalancerName, err := aws.LoadBalancerByVpc(name)
+	if err != nil {
+		return err
+	}
+	if loadBalancerName != "" {
+		err = aws.DeleteElasticLoadBalancer(loadBalancerName)
+		if err != nil {
+			return err
+		}
+	}
+
+	targetGroup, err := aws.LoadBalancerTargetGroupByVpc(name)
+	if err != nil {
+		return err
+	}
+	if targetGroup != "" {
+		err = aws.DeleteLoadBalancerTargetGroup(targetGroup)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = aws.DeleteVpc(name)

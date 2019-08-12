@@ -1,6 +1,10 @@
 package awsom
 
-import "github.com/hekonsek/awsom/aws"
+import (
+	"errors"
+	"fmt"
+	"github.com/hekonsek/awsom/aws"
+)
 
 type prometheusBuilder struct {
 	Name string
@@ -20,10 +24,7 @@ func (prometheus *prometheusBuilder) Create() error {
 		return err
 	}
 	if !vpcExists {
-		err = aws.NewVpcBuilder(prometheus.Vpc).Create()
-		if err != nil {
-			return err
-		}
+		return errors.New(fmt.Sprintf("no environment %s - please create one before proceeding", prometheus.Vpc))
 	}
 
 	err = aws.NewElasticLoadBalancer(prometheus.Vpc).Create()
@@ -39,7 +40,11 @@ func (prometheus *prometheusBuilder) Create() error {
 		}
 	}
 
-	err = aws.NewEcsDeploymentBuilder(prometheus.Name, prometheus.Vpc, "prom/prometheus").Create()
+	_, domain, err := aws.FirstHostedZoneTag("env:" + prometheus.Vpc)
+	if err != nil {
+		return err
+	}
+	err = aws.NewEcsDeploymentBuilder(prometheus.Name, prometheus.Vpc, "prom/prometheus", prometheus.Name+"."+domain).Create()
 	if err != nil {
 		return err
 	}

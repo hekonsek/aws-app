@@ -36,6 +36,14 @@ func (hostedZone *hostedZoneBuilder) Create() error {
 	return nil
 }
 
+func HostedZoneExists(domain string) (bool, error) {
+	id, err := HostedZoneIdByDomain(domain)
+	if err != nil {
+		return false, err
+	}
+	return id != "", nil
+}
+
 func HostedZoneIdByDomain(domain string) (string, error) {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
@@ -43,15 +51,15 @@ func HostedZoneIdByDomain(domain string) (string, error) {
 	}
 	route53Service := route53.New(sess)
 
-	zones, err := route53Service.ListHostedZonesByName(&route53.ListHostedZonesByNameInput{
-		DNSName: aws.String(domain),
-	})
+	zones, err := route53Service.ListHostedZones(&route53.ListHostedZonesInput{})
 	if err != nil {
 		return "", err
 	}
 
-	if len(zones.HostedZones) > 0 {
-		return *zones.HostedZones[0].Id, nil
+	for _, zone := range zones.HostedZones {
+		if *zone.Name == domain+"." {
+			return *zone.Id, nil
+		}
 	}
 
 	return "", nil

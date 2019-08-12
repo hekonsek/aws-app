@@ -222,6 +222,38 @@ func VpcExistsByName(name string) (bool, error) {
 	return len(vpcs.Vpcs) > 0, nil
 }
 
+func VpcNameById(id string) (string, error) {
+	if id == "" {
+		return "", errors.New("id of VPC cannot be empty")
+	}
+
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return "", err
+	}
+
+	vpcs, err := ec2Service.DescribeVpcs(&ec2.DescribeVpcsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("id"),
+				Values: []*string{aws.String(id)},
+			},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	if len(vpcs.Vpcs) > 0 {
+		for _, tag := range vpcs.Vpcs[0].Tags {
+			if *tag.Key == "Name" {
+				return *tag.Value, nil
+			}
+		}
+		return "", errors.New("no Name tag for given VPC id")
+	}
+	return "", nil
+}
+
 func VpcId(name string) (string, error) {
 	if name == "" {
 		return "", errors.New("name of VPC cannot be empty")

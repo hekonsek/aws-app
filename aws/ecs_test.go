@@ -74,7 +74,7 @@ func TestCreateEcsApplication(t *testing.T) {
 	assert.NoError(t, err)
 
 	// When
-	err = aws.NewEcsDeploymentBuilder(name, name, "hekonsek/http-echo").Create()
+	err = aws.NewEcsDeploymentBuilder(name, name, "hekonsek/http-echo", "example.com").Create()
 
 	// Then
 	assert.NoError(t, err)

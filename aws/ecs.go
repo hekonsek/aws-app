@@ -127,6 +127,14 @@ func (cluster *ecsClusterBuilder) Create() error {
 	return nil
 }
 
+func EcsClusterArnByVpcName(vpc string) (string, error) {
+	id, err := VpcId(vpc)
+	if err != nil {
+		return "", err
+	}
+	return EcsClusterArnByVpcId(id)
+}
+
 func EcsClusterArnByVpcId(vpcId string) (string, error) {
 	ecsService, err := EcsService()
 	if err != nil {
@@ -257,13 +265,15 @@ type ecsDeploymentBuilder struct {
 	Name    string
 	Cluster string
 	Image   string
+	Domain  string
 }
 
-func NewEcsDeploymentBuilder(name string, cluster string, image string) *ecsDeploymentBuilder {
+func NewEcsDeploymentBuilder(name string, cluster string, image string, domain string) *ecsDeploymentBuilder {
 	return &ecsDeploymentBuilder{
 		Name:    name,
 		Cluster: cluster,
 		Image:   image,
+		Domain:  domain,
 	}
 }
 
@@ -298,7 +308,7 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 					return errors.New(fmt.Sprintf("Service %s in cluster %s is draining for the past minute. Aborting startup.", deployment.Name, deployment.Cluster))
 				}
 				time.Sleep(time.Second * 10)
-			} else {
+			} else if *serviceState.Services[0].Status != "INACTIVE" {
 				return errors.New(fmt.Sprintf("service %s exists in cluster %s", deployment.Name, deployment.Cluster))
 			}
 		} else {
@@ -351,7 +361,7 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 		return err
 	}
 
-	err = AssignLoadBalancerTargetGroup(deployment.Cluster, targetGroupName, "/"+deployment.Name)
+	err = AssignLoadBalancerTargetGroup(deployment.Cluster, targetGroupName, deployment.Domain)
 	if err != nil {
 		return err
 	}
@@ -361,6 +371,15 @@ func (deployment *ecsDeploymentBuilder) Create() error {
 
 func DeleteEcsApplication(runtime string, name string) error {
 	ecsService, err := EcsService()
+	if err != nil {
+		return err
+	}
+
+	targetGroupName := runtime + "-" + name
+	if len(targetGroupName) > 32 {
+		targetGroupName = targetGroupName[0:32]
+	}
+	err = DeleteLoadBalancerTargetGroup(targetGroupName)
 	if err != nil {
 		return err
 	}

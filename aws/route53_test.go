@@ -1,6 +1,7 @@
 package aws_test
 
 import (
+	"github.com/hekonsek/awsom"
 	"github.com/hekonsek/awsom/aws"
 	randomstrings "github.com/hekonsek/random-strings"
 	"github.com/stretchr/testify/assert"
@@ -13,8 +14,7 @@ func TestCreateHostedZone(t *testing.T) {
 	// Given
 	domain := randomstrings.ForHuman() + ".com"
 	defer func() {
-		err := aws.DeleteHostedZone(domain)
-		assert.NoError(t, err)
+		awsom.Warn(aws.DeleteHostedZone(domain))
 	}()
 
 	// When
@@ -22,9 +22,9 @@ func TestCreateHostedZone(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Then
-	zoneId, err := aws.HostedZoneIdByDomain(domain)
+	exists, err := aws.HostedZoneExists(domain)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, zoneId)
+	assert.True(t, exists)
 }
 
 func TestTagHostedZone(t *testing.T) {

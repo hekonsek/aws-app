@@ -8,35 +8,23 @@ import (
 	"testing"
 )
 
-func TestMonitoringEnvironmentCreated(t *testing.T) {
+func TestMonitoringClusterCreated(t *testing.T) {
 	t.Parallel()
 
-	vpcName := randomstrings.ForHumanWithHash()
+	environment := randomstrings.ForHumanWithHash()
 	// Given
 	defer func() {
-		err := aws.DeleteVpc(vpcName)
-		assert.NoError(t, err)
+		awsom.Warn(awsom.DeleteEnv(environment))
+		awsom.Warn(aws.DeleteHostedZone(environment + ".com"))
 	}()
-	defer func() {
-		err := aws.DeleteElasticLoadBalancer(vpcName)
-		assert.NoError(t, err)
-	}()
-	defer func() {
-		err := aws.DeleteEcsCluster(vpcName)
-		assert.NoError(t, err)
-	}()
-	defer func() {
-		err := aws.DeleteEcsApplication(vpcName, "prometheus")
-		assert.NoError(t, err)
-	}()
+	err := awsom.NewEnvBuilder(environment, environment+".com").Create()
+	assert.NoError(t, err)
 
 	// When
-	err := awsom.NewPrometheusBuilder().WithVPc(vpcName).Create()
+	err = awsom.NewPrometheusBuilder().WithVPc(environment).Create()
 	assert.NoError(t, err)
 
 	// Then
-	vpcExists, err := aws.VpcExistsByName(vpcName)
-	assert.True(t, vpcExists)
-	clusterExists, err := aws.EcsClusterExistsByName(vpcName)
+	clusterExists, err := aws.EcsClusterExistsByName(environment)
 	assert.True(t, clusterExists)
 }

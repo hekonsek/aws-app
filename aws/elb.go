@@ -76,6 +76,32 @@ func DeleteElasticLoadBalancer(name string) error {
 	return err
 }
 
+func LoadBalancerByVpc(vpc string) (string, error) {
+	sess, err := awsom_session.NewSession()
+	if err != nil {
+		return "", err
+	}
+	elbService := elbv2.New(sess)
+
+	vpcId, err := VpcId(vpc)
+	if err != nil {
+		return "", err
+	}
+
+	loadBalancerInfo, err := elbService.DescribeLoadBalancers(&elbv2.DescribeLoadBalancersInput{})
+	if err != nil {
+		return "", err
+	}
+
+	for _, loadBalancer := range loadBalancerInfo.LoadBalancers {
+		if *loadBalancer.VpcId == vpcId {
+			return *loadBalancer.LoadBalancerName, nil
+		}
+	}
+
+	return "", nil
+}
+
 func LoadBalancerArnByVpcId(vpcId string) (string, error) {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
@@ -154,7 +180,7 @@ func (builder *loadBalancerTargetGroupBuilderBuilder) WithIPs(IPs []string) *loa
 	return builder
 }
 
-func (targetGroup *loadBalancerTargetGroupBuilderBuilder) Create() (string, error) {
+func (targetGroup *loadBalancerTargetGroupBuilderBuilder) Create() (arn string, err error) {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return "", err
@@ -197,6 +223,32 @@ func (targetGroup *loadBalancerTargetGroupBuilderBuilder) Create() (string, erro
 	return *createdTargetGroup.TargetGroups[0].TargetGroupArn, nil
 }
 
+func LoadBalancerTargetGroupByVpc(vpc string) (string, error) {
+	sess, err := awsom_session.NewSession()
+	if err != nil {
+		return "", err
+	}
+	elbService := elbv2.New(sess)
+
+	vpcId, err := VpcId(vpc)
+	if err != nil {
+		return "", err
+	}
+
+	targetGroups, err := elbService.DescribeTargetGroups(&elbv2.DescribeTargetGroupsInput{})
+	if err != nil {
+		return "", err
+	}
+
+	for _, group := range targetGroups.TargetGroups {
+		if *group.VpcId == vpcId {
+			return *group.TargetGroupName, nil
+		}
+	}
+
+	return "", nil
+}
+
 func LoadBalancerTargetGroupArnByName(name string) (string, error) {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
@@ -207,6 +259,9 @@ func LoadBalancerTargetGroupArnByName(name string) (string, error) {
 	targetGroups, err := elbService.DescribeTargetGroups(&elbv2.DescribeTargetGroupsInput{
 		Names: aws.StringSlice([]string{name}),
 	})
+	if err != nil {
+		return "", err
+	}
 
 	if len(targetGroups.TargetGroups) == 0 {
 		return "", nil
@@ -241,7 +296,7 @@ func DeleteLoadBalancerTargetGroup(name string) error {
 	return nil
 }
 
-func AssignLoadBalancerTargetGroup(loadBalancer string, targetGroup string, path string) error {
+func AssignLoadBalancerTargetGroup(loadBalancer string, targetGroup string, host string) error {
 	sess, err := awsom_session.NewSession()
 	if err != nil {
 		return err
@@ -262,9 +317,9 @@ func AssignLoadBalancerTargetGroup(loadBalancer string, targetGroup string, path
 		ListenerArn: aws.String(listenerArn),
 		Conditions: []*elbv2.RuleCondition{
 			{
-				Field: aws.String("path-pattern"),
-				PathPatternConfig: &elbv2.PathPatternConditionConfig{
-					Values: aws.StringSlice([]string{path}),
+				Field: aws.String("host-header"),
+				HostHeaderConfig: &elbv2.HostHeaderConditionConfig{
+					Values: aws.StringSlice([]string{host}),
 				},
 			},
 		},
